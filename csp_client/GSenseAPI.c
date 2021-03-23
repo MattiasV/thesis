@@ -30,40 +30,21 @@ void download_list()
 
 int load_list()
 {
-	csp_iface_t iface;
-	csp_packet_t * packet;
 
-	iface = init_udp();
-	packet = csp_buffer_get(100);
+	uint8_t data[1];
+	int length;
+	data[0] = REFRESH_ID;
+	length = sizeof(data);
+	sendToServer(data, length, 0);
+}
 
-	if (packet == NULL) {
-		/* Could not get buffer element */
-		printf("Failed to get buffer element\n");
-		return 2;
-	}
-	packet->data[0] = REFRESH_ID;
-	packet->length = 1;
+void checkRefresh(uint8_t refresh){
 
-	csp_if_udp_tx(&iface, packet, 1000);
-
-	uint8_t rec_buffer;
-	while(1){
-		csp_qfifo_t input;
-		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {
-			printf("reading\n");
-			continue;
-		}
-		rec_buffer = input.packet->data[0];
-		break;
-	}
-
-	if(rec_buffer == 1){
+	if(refresh == 1){
 		printf("We moeten gaan refreshen\n");
-		return 1;
 	}
 	else {
 		printf("We moeten niet gaan refreshen \n");
-		return 0;
 	}
 }
 
@@ -76,6 +57,7 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 	packet = csp_buffer_get(100);
 
 	int forloopsize = 0;
+
 	switch(data[0]){
 		case SET_ID:
 			forloopsize = MAX_SET_BYTES;
@@ -85,6 +67,9 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 			break;
 		case DOWNLOAD_ID:
 			forloopsize = MAX_DOWNLOAD_BYTES;
+			break;
+		case REFRESH_ID:
+			forloopsize = MAX_REFRESH_BYTES;
 			break;
 		}
 
@@ -96,6 +81,8 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 
 	/* receiving packet */
 	csp_packet_t * rxpacket;
+	csp_sleep_ms(1000);
+	printf("DDD\n");
 	while(1){
 		csp_qfifo_t input;
 		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {
@@ -121,10 +108,14 @@ void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 			setUpdated(amountOfIds);
 			break;
 		case GET_ID:
-			addValues(data, sizeof(data));
+			printf("AAA\n");
+			//addValues(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
 			store_list(data);
+			break;
+		case REFRESH_ID:
+			checkRefresh(data[0]);
 			break;
 	}
 }

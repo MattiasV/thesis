@@ -30,6 +30,7 @@
 //  (1 byte for get GET_ID + max bytes for ID)* amount of possible parameters to get
 #define MAX_GET_BYTES 1+MAX_INDEX_SIZE*JSON_AMOUNT_OF_PARAMETERS
 #define MAX_DOWNLOAD_BYTES 1;
+#define MAX_REFRESH_BYTES 1;
 
 //json object list sizes
 #define JSON_MAX_SIZE 1024
@@ -54,6 +55,7 @@ uint8_t * idArray;
 // get_parameter functies
 void download_list();
 int load_list();
+void checkRefresh(uint8_t refresh);
 
 // Handige functies die we overal gebruiken
 const char* get_type(uint8_t par_id);
