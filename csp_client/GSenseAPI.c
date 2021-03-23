@@ -54,35 +54,22 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 	csp_packet_t * packet;
 
 	iface = init_udp();
-	packet = csp_buffer_get(100);
+	packet = csp_buffer_get(MAX_SET_BYTES);
 
 	int forloopsize = 0;
 
-	switch(data[0]){
-		case SET_ID:
-			forloopsize = MAX_SET_BYTES;
-			break;
-		case GET_ID:
-			forloopsize = MAX_GET_BYTES;
-			break;
-		case DOWNLOAD_ID:
-			forloopsize = MAX_DOWNLOAD_BYTES;
-			break;
-		case REFRESH_ID:
-			forloopsize = MAX_REFRESH_BYTES;
-			break;
-		}
-
-	for(int i = 0; i < forloopsize; i++){
+	for(int i = 0; i < length; i++){
 		packet->data[i] = bytesToSend[i];
 	}
 	packet->length = length;
+
+	//wait for rx thread to be at the reading line
+	csp_sleep_ms(10);
+
 	csp_if_udp_tx(&iface, packet, 1000);
 
 	/* receiving packet */
 	csp_packet_t * rxpacket;
-	csp_sleep_ms(1000);
-	printf("DDD\n");
 	while(1){
 		csp_qfifo_t input;
 		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {
@@ -97,19 +84,17 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 
 	uint8_t identifier = packet->data[0];
-
-	uint8_t data[packet->length];
+	uint8_t data[packet->length - 1];
 	for(int i = 1; i < packet->length; i++){
 		data[i-1] = packet->data[i];
 	}
 
-	switch(data[0]){
+	switch(identifier){
 		case SET_ID:
 			setUpdated(amountOfIds);
 			break;
 		case GET_ID:
-			printf("AAA\n");
-			//addValues(data, sizeof(data));
+			addValues(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
 			store_list(data);
@@ -123,7 +108,7 @@ void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 
 csp_iface_t init_udp()
 {
-	if(csp_buffer_init(10, 100)<0)
+	if(csp_buffer_init(1, MAX_SET_BYTES)<0)
 	printf("could not initialize buffer\n");
 
 	csp_conf_t csp_conf;

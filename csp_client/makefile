@@ -23,6 +23,8 @@ jsonFunctions: full_get_parameter.c jsonFunctions.c GSenseAPI.c $(HDRF)
 valgrind:
 	valgrind --leak-check=yes ./set_parameter $(HDRF) $(SRCFUDP) $(HDRF) $(CFLAGS)
 
+test: test.c ./src/interfaces/csp_if_udp.c
+	$(CC) -o test test.c $(SRCFUDP) $(HDRF) $(CFLAGS)
 
 # Alles cleanen om project opnieuw te builden : type in console make clean
 clean:

@@ -1,5 +1,6 @@
 #include "jsonFunctions.h"
 #include "GSenseAPI.h"
+#include "config.h"
 
 void store_list(uint8_t * data)
 {
@@ -151,52 +152,69 @@ void addValues(uint8_t * data, int length){
   bzero(serialized_list_bytes, JSON_MAX_SIZE);
 
 	int size = getValuesFromJson(json_object_list);
+	parameter_list par_list[JSON_OBJ_LIST_SIZE];
+
+	for(int i = 0; i < size; i++){
+
+		par_list[i].id = json_object_get_int(json_object_list[i*(size + 1) + ID_INDEX]);
+		par_list[i].description = json_object_get_string(json_object_list[i*(size + 1) + DESC_INDEX]);
+		par_list[i].type = json_object_get_string(json_object_list[i*(size + 1) + TYPE_INDEX]);
+		par_list[i].size = json_object_get_int(json_object_list[i*(size + 1) + SIZE_INDEX]);
+		if(par_list[i].id != 4)
+			par_list[i].value.intvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
+		else
+		par_list[i].value.floatvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
+		par_list[i].updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
+
+	}
+
+	for(int i = 0; i < length;){ // Here we will read the output of the server and look at which ID's and value he sent us
+		for(int j = 0; j<size; j++){
+			if(data[i] == par_list[j].id){
+
+				printf("match found: %d\n", par_list[j].id);
+				if(strcmp("uint8_t",par_list[j].type) == 0){
+					par_list[j].value.intvalue = data[i+1];
+					i += 2*sizeof(uint8_t); // 1 byte for id and 1 byte for value
+
+				}else{
+					for(int k = 0; k < 4; k++){
+						fourBytesUnion.u8bytes[k] = data[i+1+k]; //fill the uint8_t [4] array with the next 4 bytes to get the uint32_t or the float
+					}
+
+					if(strcmp("uint32_t",par_list[j].type) == 0){
+						par_list[j].value.intvalue = fourBytesUnion.u32bytes;
+					}else{
+						par_list[j].value.floatvalue = fourBytesUnion.fbytes;
+						printf("float value: %f\n", par_list[j].value.floatvalue);
+					}
+					i += (sizeof(uint8_t) + sizeof(uint32_t));
+				}
+			}
+		}
+	}
 
 	for(int i = 0; i < size; i++){
 
 		bzero(temp_serialized_list, JSON_OBJ_LIST_SIZE);
-		int par_id = json_object_get_int(json_object_list[i*(size + 1) + ID_INDEX]);
-		const char * description = json_object_get_string(json_object_list[i*(size + 1) + DESC_INDEX]);
-		const char * type = json_object_get_string(json_object_list[i*(size + 1) + TYPE_INDEX]);
-		int data_size = json_object_get_int(json_object_list[i*(size + 1) + SIZE_INDEX]);
-		int value = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
-		bool updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
-
-		int j = 0;
-		while(j < length){
-			//Check of the data[j] (which represents always the id, this is made sure with the j+=...) is the same as the current id
-			if(data[j] == par_id && updated != true){//Nieuwe value wordt niet geupdatet wanneer er eigenlijk een nieuwe value nog moet geschreven worden aan de server.
-
-				if(strcmp("uint8_t",type) == 0){
-					value = data[j+1];
-					j += 2*sizeof(uint8_t); // 1 byte for id and 1 byte for value
-
-				}else{
-					for(int k = 0; k < 4; k++){
-						fourBytesUnion.u8bytes[k] = data[j+1+k]; //fill the uint8_t [4] array with the next 4 bytes to get the uint32_t or the float
-					}
-
-					if(strcmp("uint32_t",type) == 0){
-						value = fourBytesUnion.u32bytes;
-					}else{
-						value = fourBytesUnion.fbytes;
-					}
-					j += (sizeof(uint8_t) + sizeof(uint32_t));
-				}
-			}
-		}
-
-
-		sprintf(temp_serialized_list,"%d,%s,%s,%d,%d,%d,", par_id, description, type, data_size, value, updated); // puts variables in string
-
-		if(size == 0)
+		int id = par_list[i].id;
+		const char * description = par_list[i].description;
+		const char * type = par_list[i].type;
+		int size = par_list[i].size;
+		bool updated = par_list[i].updated;
+		if(id != 4)
+			sprintf(temp_serialized_list,"%d,%s,%s,%d,%d,%d,", id, description, type, size, par_list[i].value.intvalue, updated); // puts variables in string
+		else
+			sprintf(temp_serialized_list,"%d,%s,%s,%d,%f,%d,", id, description, type, size, par_list[i].value.floatvalue, updated); // puts variables in string
+		if(i == 0)
 			strcpy(serialized_list, temp_serialized_list);
 		else
 			strcat(serialized_list, temp_serialized_list);
-	}
+		}
+
 
 	snprintf(serialized_list_bytes, JSON_MAX_SIZE, "%s", serialized_list);
-
+	printf("serialized_list_bytes: %s\n", serialized_list_bytes);
 	store_list(serialized_list_bytes);
 
 	free(temp_serialized_list);

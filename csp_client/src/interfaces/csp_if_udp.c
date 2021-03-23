@@ -37,7 +37,6 @@ int csp_if_udp_tx(csp_iface_t * interface, csp_packet_t * packet, uint32_t timeo
 	packet->id.ext = csp_hton32(packet->id.ext);
 	peer_addr.sin_family = AF_INET;
 	peer_addr.sin_port = htons(9600);
-	printf("BBB\n");
 	int sent = sendto(sockfd, (void *) &packet->id, packet->length + 4, MSG_CONFIRM, (struct sockaddr *) &peer_addr, sizeof(peer_addr));
 	csp_buffer_free(packet);
 	close(sockfd);

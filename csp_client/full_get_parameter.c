@@ -42,8 +42,10 @@ int main(int argc, char* argv[])
 			bytesToSend[i+1] = parameterId;
 		}
 	}
-
-	sendToServer(bytesToSend, size, size);
+	for(int i = 0; i < MAX_GET_BYTES; i++){
+		printf("bytesToSend[%d]: %d\n",i,bytesToSend[i]);
+	}
+	sendToServer(bytesToSend, argc, size);
 
 	free(idArray);
 	free(bytesToSend);
