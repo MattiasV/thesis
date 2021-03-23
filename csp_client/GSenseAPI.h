@@ -28,7 +28,7 @@
 //  (1 byte for SET_ID + max bytes for ID + 4 bytes for max value) * amount of possible parameters to set
 #define MAX_SET_BYTES (1 + MAX_INDEX_SIZE + 4)*JSON_AMOUNT_OF_PARAMETERS
 //  (1 byte for get GET_ID + max bytes for ID)* amount of possible parameters to get
-#define MAX_GET_BYTES (1+MAX_INDEX_SIZE)*JSON_AMOUNT_OF_PARAMETERS
+#define MAX_GET_BYTES 1+MAX_INDEX_SIZE*JSON_AMOUNT_OF_PARAMETERS
 #define MAX_DOWNLOAD_BYTES 1;
 
 //json object list sizes

@@ -19,6 +19,10 @@ int main(int argc, char* argv[])
 	int size = argc-1;
 	argv = &argv[1];
 
+	if(size > MAX_GET_BYTES){
+		printf("you provided too musch parameters!\n");
+		printf("MAX amount of parameters is %d, you provided %d parameters\n", MAX_GET_BYTES, size);
+	}
 	bytesToSend = malloc(MAX_GET_BYTES);
 	bzero(bytesToSend, MAX_GET_BYTES);
 
