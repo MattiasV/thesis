@@ -246,10 +246,13 @@ void setUpdated(int amountOfIds){
 		int value = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
 		bool updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
 
+
 		for(int j = 0; j < amountOfIds; j++){
-			if(idArray[i] == par_id)
+			if(idArray[j] == par_id){
 				updated = true;
+			}
 		}
+
 		sprintf(temp_serialized_list,"%d,%s,%s,%d,%d,%d,", par_id, description, type, data_size, value, updated); // puts variables in string
 
 		if(size == 0)
@@ -258,13 +261,13 @@ void setUpdated(int amountOfIds){
 			strcat(serialized_list, temp_serialized_list);
 
 	}
-
 	snprintf(serialized_list_bytes, JSON_MAX_SIZE, "%s", serialized_list);
 
 	store_list(serialized_list_bytes);
 
 	json_object_put(parsed_json);
 
+	free(idArray);
 	free(temp_serialized_list);
 	free(serialized_list);
 	free(serialized_list_bytes);
@@ -356,7 +359,7 @@ const char* get_type(uint8_t par_id)
 {
 	int found = 0;
 	char buffer[JSON_MAX_SIZE];
-	char * typechar;
+	const char * typechar;
 	int array_size;
 	int succes;
 	struct json_object *parameter_array;
@@ -390,10 +393,11 @@ const char* get_type(uint8_t par_id)
 		{
 			json_object_object_get_ex(parameter, "type" , &type);
 			i = array_size;
-			typechar = (char * )json_object_get_string(type);
+			typechar = json_object_get_string(type);
 			found = 1;
 		}
 	}
+	printf("typechar: %s\n", typechar);
 	json_object_put(parsed_json);
 	return typechar;
 }

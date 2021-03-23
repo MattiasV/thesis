@@ -56,8 +56,6 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 	iface = init_udp();
 	packet = csp_buffer_get(MAX_SET_BYTES);
 
-	int forloopsize = 0;
-
 	for(int i = 0; i < length; i++){
 		packet->data[i] = bytesToSend[i];
 	}
@@ -67,7 +65,7 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 	csp_sleep_ms(10);
 
 	csp_if_udp_tx(&iface, packet, 1000);
-
+	
 	/* receiving packet */
 	csp_packet_t * rxpacket;
 	while(1){
@@ -79,11 +77,13 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 		break;
 	}
 	returnedFromServer(rxpacket, amountOfIds);
+
 }
 
 void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 
 	uint8_t identifier = packet->data[0];
+	printf("identifier: %d\n", identifier);
 	uint8_t data[packet->length - 1];
 	for(int i = 1; i < packet->length; i++){
 		data[i-1] = packet->data[i];
@@ -105,7 +105,6 @@ void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 	}
 }
 
-
 csp_iface_t init_udp()
 {
 	if(csp_buffer_init(1, MAX_SET_BYTES)<0)
@@ -119,7 +118,8 @@ csp_iface_t init_udp()
 
 	static csp_iface_t iface;
 	csp_if_udp_init(&iface, IP );
-	csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
+	csp_route_set(CSP_DEFAULT_ROUTE, &iface, CSP_NODE_MAC);
+	csp_route_start_task(0, 0);
 
   return iface;
 }

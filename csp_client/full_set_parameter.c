@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "GSenseAPI.h"
+#include "jsonFunctions.h"
 
 int main(int argc, char* argv[])
 {
@@ -33,7 +34,6 @@ int main(int argc, char* argv[])
 	for(int i = 0; i < size; i += 2){
 
 		uint8_t parameterId = atoi(argv[0]);
-
 		const char* type = get_type(parameterId);
 
 		if(strcmp("UNKNOWN",type) == 0)
@@ -101,8 +101,6 @@ int main(int argc, char* argv[])
 	}
 
 	sendToServer(bytesToSend, length, size/2);
-	free(idArray);
 	free(bytesToSend);
 	return 0;
-
 }

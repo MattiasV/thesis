@@ -150,7 +150,7 @@ csp_conn_t * csp_conn_find(uint32_t id, uint32_t mask) {
 		if ((conn->state != CONN_CLOSED) && (conn->type == CONN_CLIENT) && (conn->idin.ext & mask) == (id & mask))
 			return conn;
 	}
-	
+
 	return NULL;
 
 }
@@ -342,7 +342,7 @@ csp_conn_t * csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t tim
 		return NULL;
 #endif
 	}
-	
+
 	/* Find an unused ephemeral port */
 	csp_conn_t * conn;
 
@@ -357,7 +357,7 @@ csp_conn_t * csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t tim
 
 		outgoing_id.sport = sport;
 		incoming_id.dport = sport;
-		
+
 		/* Match on destination port of _incoming_ identifier */
 		conn = csp_conn_find(incoming_id.ext, CSP_ID_DPORT_MASK);
 

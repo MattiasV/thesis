@@ -1,7 +1,7 @@
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 Gomspace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk) 
+Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -75,9 +75,9 @@ static inline int init_cond_clock_monotonic(pthread_cond_t * cond)
 }
 
 pthread_queue_t * pthread_queue_create(int length, size_t item_size) {
-	
+
 	pthread_queue_t * q = malloc(sizeof(pthread_queue_t));
-	
+
 	if (q != NULL) {
 		q->buffer = malloc(length*item_size);
 		if (q->buffer != NULL) {
@@ -98,7 +98,6 @@ pthread_queue_t * pthread_queue_create(int length, size_t item_size) {
 	}
 
 	return q;
-	
 }
 
 void pthread_queue_delete(pthread_queue_t * q) {
@@ -112,7 +111,7 @@ void pthread_queue_delete(pthread_queue_t * q) {
 	return;
 
 }
-	
+
 
 static inline int wait_slot_available(pthread_queue_t * queue, struct timespec *ts) {
 
@@ -237,7 +236,7 @@ int pthread_queue_items(pthread_queue_t * queue) {
 	pthread_mutex_lock(&(queue->mutex));
 	int items = queue->items;
 	pthread_mutex_unlock(&(queue->mutex));
-	
+
 	return items;
-	
+
 }
