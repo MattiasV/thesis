@@ -1,0 +1,93 @@
+#include "GSenseHal.h"
+
+/** 		MEMORY MAPPING
+	0 - 100 	: Version file
+	100 - 200 	: System control file
+	200 - 300	: Camera 1 control file
+	300 - 400	: Camera 2 control file
+*/
+
+// Some local variables to keep everything clean
+unsigned char* write_addr;
+void *address, *virt_addr;
+unsigned long read_result;
+int uio_fd;
+
+void setRegister_uint8(uio_register_t parameter, uint8_t value)
+{
+	uio_fd = open_uio();
+	int offset = parameter;
+
+	write_addr = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
+	if(write_addr == NULL) { printf("Failed to map memory \n");}
+
+	write_addr[offset] = value;
+	munmap(write_addr,MAP_SIZE);
+}
+
+uint8_t getRegister_uint8(uio_register_t parameter)
+{
+	int uio_fd = open_uio();
+	int offset = parameter;
+
+	address = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
+	if(address == NULL) { printf("Failed to map memory \n");}
+
+	virt_addr = address + offset;
+	read_result = *((unsigned char *) virt_addr);
+	uint8_t result = read_result;
+	munmap(address,MAP_SIZE);
+
+	return result;
+}
+
+void setRegister_uint32 (uio_register_t parameter, uint32_t value)
+{
+	uio_fd = open_uio();
+	int offset = parameter;
+
+	write_addr = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
+	if(write_addr == NULL) { printf("Failed to map memory \n");}
+
+	write_addr[offset] = value;
+	munmap(write_addr,MAP_SIZE);
+}
+
+uint32_t getRegister_uint32 (uio_register_t parameter)
+{
+	int uio_fd = open_uio();
+	int offset = parameter;
+
+	address = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
+	if(address == NULL) { printf("Failed to map memory \n");}
+
+	virt_addr = address + offset;
+	read_result = *((unsigned char *) virt_addr);
+	uint32_t result = read_result;
+	printf("Value written here is %d \n", result);
+
+	munmap(address,MAP_SIZE);
+
+	return result;
+}
+
+void setRegister_float (uio_register_t parameter, float value)
+{
+	printf("Here to implement uio/mem register with float \n");
+	printf("Offsett needed %d with value %f .\n",parameter,value);
+}
+
+float getRegister_float (uio_register_t parameter)
+{
+	printf("Value needed at offsett %d \n", parameter);
+	// TODO : De waarde van het register terug sturen
+	float testVal = 4.21f;
+	return testVal;
+}
+
+int open_uio()
+{
+	int fd = open("/dev/uio0", O_RDWR);
+	if(fd == 0){ printf("Cannot open UIO file \n");}
+	return fd;
+}

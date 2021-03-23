@@ -1,0 +1,11 @@
+Build started at 2021-02-23T12:17:29.941231
+Main binary: /usr/bin/python3
+Build Options: 
+Python system: Linux
+The Meson build system
+Version: 0.53.2
+Source dir: /home/mattias/Thesis/csp/src/arch
+Build dir: /home/mattias/Thesis/csp/src/arch/compile
+Build type: native build
+
+ERROR: First statement must be a call to project
