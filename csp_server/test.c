@@ -20,15 +20,13 @@ int main(int argc, char* argv[]) {
       uint32_t u32byte;
     }testunion;
 
-    testunion.fbyte = 700;
+    testunion.fbyte = 700.50;
 
     memcpy(test1,test2,8);
 
     for(int i = 0; i < 4; i++){
-      printf("%d\n", test1[i]);
-      printf("%d\n", testunion.u8byte[i]);
+      printf("byte %d: %d\n",i, testunion.u8byte[i]);
     }
-
 
     return 0;
 }

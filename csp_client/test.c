@@ -76,7 +76,7 @@ CSP_DEFINE_TASK(task_server) {
 
 }
 
-void(task_client) {
+CSP_DEFINE_TASK(task_client) {
 
 	csp_packet_t * packet;
 	csp_conn_t * conn;
@@ -154,8 +154,7 @@ int main(int argc, char * argv[]) {
   csp_conf_t csp_conf;
 	csp_conf_get_defaults(&csp_conf);
 	csp_conf.address = MY_ADDRESS;
-	if(csp_init(&csp_conf) < 0)
-	printf("could not initialize csp\n");
+	csp_init(MY_ADDRESS);
 
 	/* Start router task with 500 word stack, OS task priority 1 */
 	csp_route_start_task(500, 1);

@@ -65,7 +65,7 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 	csp_sleep_ms(10);
 
 	csp_if_udp_tx(&iface, packet, 1000);
-	
+
 	/* receiving packet */
 	csp_packet_t * rxpacket;
 	while(1){
@@ -119,7 +119,6 @@ csp_iface_t init_udp()
 	static csp_iface_t iface;
 	csp_if_udp_init(&iface, IP );
 	csp_route_set(CSP_DEFAULT_ROUTE, &iface, CSP_NODE_MAC);
-	csp_route_start_task(0, 0);
 
   return iface;
 }

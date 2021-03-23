@@ -165,7 +165,6 @@ void addValues(uint8_t * data, int length){
 		else
 		par_list[i].value.floatvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
 		par_list[i].updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
-
 	}
 
 	for(int i = 0; i < length;){ // Here we will read the output of the server and look at which ID's and value he sent us
@@ -246,8 +245,8 @@ void setUpdated(int amountOfIds){
 		int value = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
 		bool updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
 
-
-		for(int j = 0; j < amountOfIds; j++){
+		//printf("%d\n", __LINE__);
+		for(int j = 0; j < amountOfIds+1; j++){
 			if(idArray[j] == par_id){
 				updated = true;
 			}
@@ -397,7 +396,6 @@ const char* get_type(uint8_t par_id)
 			found = 1;
 		}
 	}
-	printf("typechar: %s\n", typechar);
 	json_object_put(parsed_json);
 	return typechar;
 }

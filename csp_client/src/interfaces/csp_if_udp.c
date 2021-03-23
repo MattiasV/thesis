@@ -85,8 +85,6 @@ CSP_DEFINE_TASK(csp_if_udp_rx_task) {
 			packet->id.ext = csp_ntoh32(packet->id.ext);
 
 			csp_new_packet(packet, iface, NULL);
-
-
 		}
 	}
 

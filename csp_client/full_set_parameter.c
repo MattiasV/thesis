@@ -25,16 +25,17 @@ int main(int argc, char* argv[])
 	argv = &argv[1];
 	int size = argc-1;
 	int length = 0;
+
 	bytesToSend = malloc(MAX_SET_BYTES);
 	idArray = malloc(size/2);
 
 	bytesToSend[0] = SET_ID;
 
-
 	for(int i = 0; i < size; i += 2){
 
-		uint8_t parameterId = atoi(argv[0]);
+		uint8_t parameterId = atoi(argv[i]);
 		const char* type = get_type(parameterId);
+		//printf("parameterId: %d, type: %s\n",parameterId, type);
 
 		if(strcmp("UNKNOWN",type) == 0)
 		{
@@ -44,16 +45,26 @@ int main(int argc, char* argv[])
 		if(strcmp("uint8_t",type) == 0)
 		{
 			int parameterCheck = atoi(argv[i+1]);
+			//printf("parameterCheck: %d\n", parameterCheck);
 			if(parameterCheck <= 255 && parameterCheck >= 0)
 			{
 				uint8_t argvSending[2];
+				bzero(&argvSending, sizeof(argvSending));
 				uint8_t id, value;
 				sscanf(argv[i], "%hhd", &id);
 				sscanf(argv[i+1], "%hhd", &value);
 				idArray[i/2] = id;
-				argvSending[i] = id;
-				argvSending[i+1] = value;
+				argvSending[0] = id;
+				argvSending[1] = value;
 				memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
+
+				for(int j = 0; j < i+3; j++){
+					printf("bytesToSend[j]: %d\n", bytesToSend[j]);
+				}
+				for(int j = 0; j < (i+1)/2; j++){
+					printf("idArray[j]: %d\n", idArray[j]);
+				}
+				printf("\n\n");
 				length += 2;
 			}
 			else
@@ -73,8 +84,8 @@ int main(int argc, char* argv[])
 				sscanf(argv[i], "%hhd", &id);
 				sscanf(argv[i+1], "%d", &value);
 				idArray[i/2] = id;
-				argvSending[i] = id;
-				argvSending[i+1] = value;
+				argvSending[0] = id;
+				argvSending[1] = value;
 				memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
 				length += 5;
 			}
@@ -92,14 +103,15 @@ int main(int argc, char* argv[])
 			float value;
 			sscanf(argv[i], "%hhd", &id);
 			sscanf(argv[i+1], "%f", &value);
-			idArray[i/2] = id;
-			argvSending[i] = id;
-			argvSending[i+1] = value;
+			argvSending[0] = id;
+			argvSending[1] = value;
 			memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
 			length += 5;
 		}
 	}
-
+	// for(int i = 0; i < size; i++){
+	// 	printf("aaaaaaaaaa: %d\n", bytesToSend[i]);
+	// }
 	sendToServer(bytesToSend, length, size/2);
 	free(bytesToSend);
 	return 0;

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -pthread -l json-c -I.
+CFLAGS= -pthread -g -l json-c -I.
 SRCFUDP = ./src/*.c ./src/rtable/csp_rtable_static.c ./src/arch/posix/*.c ./src/transport/*.c ./src/interfaces/csp_if_lo.c ./src/interfaces/csp_if_udp.c ./src/crypto/*.c
 HDRF = ./src/interfaces/csp_if_can_pbuf.h config.h jsonFunctions.h GSenseAPI.h
 
@@ -20,11 +20,8 @@ get_parameter: full_get_parameter.c GSenseAPI.c jsonFunctions.c $(HDRF)
 jsonFunctions: full_get_parameter.c jsonFunctions.c GSenseAPI.c $(HDRF)
 	$(CC) -o jsonFunctions full_get_parameter.c GSenseAPI.c jsonFunctions.c $(SRCFUDP) $(HDRF) $(CFLAGS)
 
-valgrind:
-	valgrind --leak-check=yes ./set_parameter $(HDRF) $(SRCFUDP) $(HDRF) $(CFLAGS)
-
 test: test.c ./src/interfaces/csp_if_udp.c
-	$(CC) -o test test.c $(SRCFUDP) $(HDRF) $(CFLAGS)
+	$(CC) -o test test.c $(SRCFUDP) $(HDRF) -pthread
 
 # Alles cleanen om project opnieuw te builden : type in console make clean
 clean:
