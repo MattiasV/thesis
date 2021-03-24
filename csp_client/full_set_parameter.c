@@ -57,14 +57,6 @@ int main(int argc, char* argv[])
 				argvSending[0] = id;
 				argvSending[1] = value;
 				memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
-
-				for(int j = 0; j < i+3; j++){
-					printf("bytesToSend[j]: %d\n", bytesToSend[j]);
-				}
-				for(int j = 0; j < (i+1)/2; j++){
-					printf("idArray[j]: %d\n", idArray[j]);
-				}
-				printf("\n\n");
 				length += 2;
 			}
 			else
