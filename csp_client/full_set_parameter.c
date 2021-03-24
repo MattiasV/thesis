@@ -103,6 +103,7 @@ int main(int argc, char* argv[])
 			float value;
 			sscanf(argv[i], "%hhd", &id);
 			sscanf(argv[i+1], "%f", &value);
+			idArray[i/2] = id;
 			argvSending[0] = id;
 			argvSending[1] = value;
 			memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));

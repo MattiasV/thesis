@@ -246,7 +246,8 @@ void setUpdated(int amountOfIds){
 		bool updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
 
 		//printf("%d\n", __LINE__);
-		for(int j = 0; j < amountOfIds+1; j++){
+		for(int j = 0; j < amountOfIds; j++){
+			printf("par_id: %d\t idArray: %d\n", par_id, idArray[j]);
 			if(idArray[j] == par_id){
 				updated = true;
 			}
