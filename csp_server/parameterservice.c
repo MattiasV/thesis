@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     csp_packet_t * packet;
 		packet = input.packet;
 
-		listen_in(packet->data);
+		listen_in(packet->data, packet->length);
 	}
 }
 
@@ -57,7 +57,7 @@ int get_parameter_list_size()
 }
 
 // Function designed for chat between client and server.
-void listen_in(uint8_t * data)
+void listen_in(uint8_t * data, int length)
 {
 	// We krijgen altijd maar max een buffer van 4-6 bytes binnen
 
@@ -77,12 +77,12 @@ void listen_in(uint8_t * data)
 		case SET_ID:
 			printf("We gaan een parameter instellen \n");
 			data = &data[1];
-			set_parameter(data);
+			set_parameter(data, length);
 			break;
 		case GET_ID:
 			printf("We gaan een parameter opvragen \n");
 			data = &data[1];
-			get_parameter(data);
+			get_parameter(data, length);
 			break;
 		case SIZE_ID:
 			printf("We gaan de grootte van de parameterlijst opvragen \n");
@@ -121,11 +121,11 @@ void send_parameter_list()
 	refresh = 0;
 }
 
-void set_parameter(uint8_t msg[])
+void set_parameter(uint8_t * msg, int length)
 {
 	uint8_t par_id;
 	par_id = msg[1];
-
+	// for loopje met de length van het packet
 	switch(par_id)
 	{
 		case 0:
@@ -157,7 +157,7 @@ void set_parameter(uint8_t msg[])
 }
 
 // Functie om de parameter te gaan lezen van de zynq
-void get_parameter(char * data)
+void get_parameter(uint8_t * data, int length)
 {
 	uint8_t recv8;
 	uint8_t sendbuf8[1];

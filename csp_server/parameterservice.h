@@ -39,8 +39,8 @@ void initialize_parameters();
 void listen_in();
 void send_refresh();
 void send_parameter_list();
-void set_parameter(uint8_t msg[]);
-void get_parameter(char * data);
+void set_parameter(uint8_t * msg, int length);
+void get_parameter(uint8_t * data, int length);
 int get_type(uint8_t);
 
 #endif // _PARAMETERSERVICE_H_
