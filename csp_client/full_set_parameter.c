@@ -102,9 +102,6 @@ int main(int argc, char* argv[])
 			length += 5;
 		}
 	}
-	// for(int i = 0; i < size; i++){
-	// 	printf("aaaaaaaaaa: %d\n", bytesToSend[i]);
-	// }
 	sendToServer(bytesToSend, length, size/2);
 	free(bytesToSend);
 	return 0;
