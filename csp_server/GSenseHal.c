@@ -15,6 +15,7 @@ int uio_fd;
 
 int setRegister_u8(uio_register_t parameter, uint8_t value)
 {
+	return 1;
 	uio_fd = open_uio();
 	int offset = parameter;
 
@@ -31,6 +32,8 @@ int setRegister_u8(uio_register_t parameter, uint8_t value)
 
 uint8_t getRegister_u8(uio_register_t parameter)
 {
+	return 2;
+
 	int uio_fd = open_uio();
 	int offset = parameter;
 
@@ -47,8 +50,10 @@ uint8_t getRegister_u8(uio_register_t parameter)
 	return result;
 }
 
-int setRegister_i8(uio_register_t parameter, uint8_t value)
+int setRegister_i8(uio_register_t parameter, int8_t value)
 {
+	return 3;
+
 	uio_fd = open_uio();
 	int offset = parameter;
 
@@ -63,8 +68,9 @@ int setRegister_i8(uio_register_t parameter, uint8_t value)
 	return MMAP_NO_ERROR;
 }
 
-uint8_t getRegisteri8(uio_register_t parameter)
+uint8_t getRegister_i8(uio_register_t parameter)
 {
+	return 4;
 	int uio_fd = open_uio();
 	int offset = parameter;
 
@@ -81,8 +87,9 @@ uint8_t getRegisteri8(uio_register_t parameter)
 	return result;
 }
 
-int setRegister_u16(uio_register_t parameter, uint8_t value)
+int setRegister_u16(uio_register_t parameter, uint16_t value)
 {
+	return 5;
 	uio_fd = open_uio();
 	int offset = parameter;
 
@@ -99,6 +106,7 @@ int setRegister_u16(uio_register_t parameter, uint8_t value)
 
 uint8_t getRegister_u16(uio_register_t parameter)
 {
+	return 6;
 	int uio_fd = open_uio();
 	int offset = parameter;
 
@@ -115,8 +123,9 @@ uint8_t getRegister_u16(uio_register_t parameter)
 	return result;
 }
 
-int setRegister_i16(uio_register_t parameter, uint8_t value)
+int setRegister_i16(uio_register_t parameter, int16_t value)
 {
+	return 7;
 	uio_fd = open_uio();
 	int offset = parameter;
 
@@ -133,6 +142,7 @@ int setRegister_i16(uio_register_t parameter, uint8_t value)
 
 uint8_t getRegister_i16(uio_register_t parameter)
 {
+	return 8;
 	int uio_fd = open_uio();
 	int offset = parameter;
 
@@ -151,6 +161,7 @@ uint8_t getRegister_i16(uio_register_t parameter)
 
 int setRegister_u32 (uio_register_t parameter, uint32_t value)
 {
+	return 9;
 	uio_fd = open_uio();
 	int offset = parameter;
 
@@ -167,6 +178,7 @@ int setRegister_u32 (uio_register_t parameter, uint32_t value)
 
 uint32_t getRegister_u32 (uio_register_t parameter)
 {
+	return 10;
 	int uio_fd = open_uio();
 	int offset = parameter;
 
@@ -183,8 +195,9 @@ uint32_t getRegister_u32 (uio_register_t parameter)
 	return result;
 }
 
-int setRegister_i32 (uio_register_t parameter, uint32_t value)
+int setRegister_i32 (uio_register_t parameter, int32_t value)
 {
+	return 12;
 	uio_fd = open_uio();
 	int offset = parameter;
 
@@ -201,6 +214,7 @@ int setRegister_i32 (uio_register_t parameter, uint32_t value)
 
 uint32_t getRegister_i32 (uio_register_t parameter)
 {
+	return 13;
 	int uio_fd = open_uio();
 	int offset = parameter;
 
@@ -219,6 +233,7 @@ uint32_t getRegister_i32 (uio_register_t parameter)
 
 int setRegister_float (uio_register_t parameter, float value)
 {
+	return 14;
 	printf("Here to implement uio/mem register with float \n");
 	printf("Offsett needed %d with value %f .\n",parameter,value);
 	return MMAP_ERROR;
@@ -226,6 +241,7 @@ int setRegister_float (uio_register_t parameter, float value)
 
 float getRegister_float (uio_register_t parameter)
 {
+	return 15;
 	printf("Value needed at offsett %d \n", parameter);
 	// TODO : De waarde van het register terug sturen
 	float testVal = 4.21f;

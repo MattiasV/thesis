@@ -152,7 +152,7 @@ void addValues(uint8_t * data, int length){
   bzero(serialized_list_bytes, JSON_MAX_SIZE);
 
 	int size = getValuesFromJson(json_object_list);
-	parameter_list par_list[JSON_OBJ_LIST_SIZE];
+	parameter_t par_list[JSON_OBJ_LIST_SIZE];
 
 	for(int i = 0; i < size; i++){
 

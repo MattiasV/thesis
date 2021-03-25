@@ -19,7 +19,6 @@
 #define MAX_PACKET_SIZE 512   //512 Bytes is the max packet size.
 #define TIMEOUT 1000
 
-
 // Global variables
 static csp_iface_t iface;
 int refresh;
@@ -61,5 +60,5 @@ void send_parameter_list();
 void set_parameter(uint8_t * msg, int length);
 void get_parameter(uint8_t * data, int length);
 void check_type_and_set_register(int * index, uint8_t * data, int type, int offset);
-
+int check_type_and_get_register(int datatype, int offset);
 #endif // _PARAMETERSERVICE_H_

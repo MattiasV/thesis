@@ -65,6 +65,7 @@ CSP_DEFINE_TASK(csp_if_udp_rx_task) {
 		while(1) {
 			uint8_t buffer[iface->mtu + 4];
 			unsigned int peer_addr_len = sizeof(peer_addr);
+			printf("Waiting for incomming data\n");
 			int received_len = recvfrom(sockfd, (uint8_t *)buffer, iface->mtu + 4, MSG_WAITALL, (struct sockaddr *) &peer_addr, &peer_addr_len);
 			/* Check for short */
 			if (received_len < 4) {
