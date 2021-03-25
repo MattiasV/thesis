@@ -11,6 +11,7 @@
 
 #include "GSenseHal.h"
 #include "./src/csp_qfifo.h"
+#include "parameterlist.h"
 
 // Parameter variable
 #define MY_ADDRESS  1			// Address of local CSP node
@@ -20,11 +21,6 @@
 // Global variables
 static csp_iface_t iface;
 int refresh;
-//ALTIJD EINDIGEN MET EEN KOMMA
-char parameter_list[] = {"0,VersionNr,uint8_t,4,0,0,1,FirmwareD,uint8_t,4,0,0,2,LedCtrl,uint8_t,1,0,0,3,CamCont,uint32_t,1,0,0,4,FloatTest,float,4,0,0,"}; // id,description,type,size,value,id,description,type,size,value,...
-#define LIST_SIZE sizeof(parameter_list);
-
-uint8_t parameter_list_byte[sizeof(parameter_list)];
 
 // Msg systeem
 #define REFRESH_ID 0
@@ -53,7 +49,7 @@ typedef struct {
 } parameter_list;
 
 // functies
-void initialize_parameters();
+void convert_parameter_list();
 void listen_in();
 void send_refresh();
 void send_parameter_list();

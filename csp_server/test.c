@@ -16,17 +16,17 @@ int main(int argc, char* argv[]) {
     test2[0] = 700;
 
     union{
-      uint8_t u8byte[4];
-      float fbyte;
-      uint32_t u32byte;
+      uint8_t u8bytes[4];
+      float fbytes;
+      uint32_t u32bytes;
     }testunion;
 
-    testunion.fbyte = 700.50;
+    testunion.fbytes = 700.50;
 
     memcpy(test1,test2,8);
 
     for(int i = 0; i < 4; i++){
-      printf("byte %d: %d\n",i, testunion.u8byte[i]);
+      printf("byte %d: %d\n",i, testunion.u8bytes[i]);
     }
 
     return 0;

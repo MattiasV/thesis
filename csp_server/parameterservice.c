@@ -3,7 +3,6 @@
 int main(int argc, char* argv[])
 {
 	refresh = 1;
-	initialize_parameters();
 
 	// SETTING UP UDP CSP SERVER AND LISTEN FOR INCOMMING MSG
 
@@ -23,7 +22,6 @@ int main(int argc, char* argv[])
   while(1) {
 
 		csp_buffer_init(1,MAX_PACKET_SIZE);
-		printf("buffers remaining: %d\n", csp_buffer_remaining);
     csp_qfifo_t input;
     if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
 			continue;
@@ -36,10 +34,9 @@ int main(int argc, char* argv[])
 }
 
 // Function to put parameters list in a byte array
-void initialize_parameters()
+void convert_parameter_list()
 {
-	sprintf(parameter_list_byte, "%s", parameter_list);
-	//printf("parameter_list: %s\n", parameter_list);
+
 }
 
 int get_parameter_list_size()
@@ -108,17 +105,8 @@ void send_refresh()
 // Send parameter list to client
 void send_parameter_list()
 {
-	csp_buffer_init(1,sizeof(parameter_list));
-	csp_packet_t * packet;
-	packet = csp_buffer_get(sizeof(parameter_list));
-	for(int i = 0; i < sizeof(parameter_list); i++){			// Filling packet->data with parameter list
-		packet->data[i] = parameter_list[i];
-	}
-	printf("data: %s\n", packet->data);
-	packet->length = sizeof(parameter_list)*8;
+	convert_parameter_list();
 
-	csp_if_udp_tx(&iface, packet, 1000);
-	refresh = 0;
 }
 
 void set_parameter(uint8_t * data, int length)
@@ -187,9 +175,16 @@ void get_parameter(uint8_t * data, int length)
 	csp_buffer_init(1,4);
 	csp_packet_t * packet;
 	packet = csp_buffer_get(4);
-	for(int i = 0; i < length;){
 
-		switch(atoi(data[0]))
+	int index = 0;
+	for(int i = 0; i < length; i++){
+
+
+
+		// NEED TO BE REWRITTEN
+		// IS STILL HARD CODED, HAS TO BE SYNCHRONIZED WITH THE PARAMETERLIST STRUCT
+		
+		switch(data[i])
 		{
 			case 0:
 				printf("Case 0 : Retrieving version number \n");
@@ -200,13 +195,14 @@ void get_parameter(uint8_t * data, int length)
 			case 2:
 				printf("Case 2 : Retrieving Value of LED \n");
 				recv8 = getRegister_uint8(LED_CTRL);
-				packet->data[0] = recv8;
-				packet->length = 1;
-				csp_if_udp_tx(&iface, packet, 1000);
+				packet->data[index] = recv8;
+				packet->length += 1;
+				index ++;
 				break;
 			case 3:
 				printf("Case 3 : Retrieving camctrl uint32\n");
 				recv32 = getRegister_uint32(CAM_CTRL);
+				fourBytesUnion->u32bytes =
 				packet->data32[0] = recv32;
 				packet->length = 4;
 				csp_if_udp_tx(&iface, packet, 1000);
