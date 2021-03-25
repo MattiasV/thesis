@@ -2,7 +2,7 @@
 #include "GSenseAPI.h"
 #include "config.h"
 
-void store_list(uint8_t * data)
+void store_list(uint8_t * data, int length)
 {
 	// JSON file gaan openen
 	int num;
@@ -13,22 +13,19 @@ void store_list(uint8_t * data)
 	fprintf(fptr,"\"parameters\": [{ \n");
 
 	// De parameters gaan invullen
-	while(data != NULL)
-	{
-		int id,  size, value;
-		bool updated;
-		char description[MAX_DESCRIPTION_SIZE], datatype[MAX_TYPE_SIZE];
+	int index_of_data = 0;
+	for(int i = 0; i < JSON_OBJ_LIST_SIZE; i++){
 
-		data = getDataString(&id, description, datatype, &size, &value, &updated, data);
-		//printf("id: %d, d_type: %s, description: %s, size: %d, value: %d, updated: %d\n", id, datatype, description, size, value, updated);
+		parameter_t parameterlist[JSON_OBJ_LIST_SIZE];
+		get_data_in_parameterlist(&parameterlist[i], data, int length, &index_of_data);
 
 		// ALLe info in JSON zetten, bij de laatste geen komma op het einde!!
-		fprintf(fptr, "\t \t \"id\":\"%d\",\n", id);
-		fprintf(fptr, "\t \t \"description\":\"%s\",\n", description);
-		fprintf(fptr, "\t \t \"type\":\"%s\",\n", datatype);
-		fprintf(fptr, "\t \t \"size\":\"%d\",\n", size);
-		fprintf(fptr, "\t \t \"value\":\"%d\",\n", value);
-		fprintf(fptr, "\t \t \"updated\":\"%d\"\n", updated);
+		fprintf(fptr, "\t \t \"id\":\"%d\",\n", parameterlist[i].id);
+		fprintf(fptr, "\t \t \"description\":\"%s\",\n", parameterlist[i].description);
+		fprintf(fptr, "\t \t \"datatype\":\"%s\",\n", parameterlist[i].datatype);
+		frptinf(fptr, "\t \t \"offset\":\"%d\",\n", parameterlist[i].offset);
+		fprintf(fptr, "\t \t \"value\":\"%d\",\n", parameterlist[i].value);
+		fprintf(fptr, "\t \t \"updated\":\"%d\"\n", parameterlist[i].updated);
 
 		if(data != NULL)
 			fprintf(fptr, "\t }, { \n");
@@ -42,103 +39,29 @@ void store_list(uint8_t * data)
 
 }
 
-uint8_t * getDataString(int * id, char description[MAX_DESCRIPTION_SIZE], char datatype[MAX_TYPE_SIZE], int * size, int * value, bool * updated, uint8_t * data){
+uint8_t * get_data_in_parameterlist(parameter_t * parameter, uint8_t * data, int length, int * index_of_data){
 
-	int caseID = 0;
-	int done = 0;
-	int index = 0;
-	char idchar[sizeof(int)], temp_type[MAX_TYPE_SIZE], temp_desc[MAX_DESCRIPTION_SIZE], sizechar[sizeof(int)], valuechar[sizeof(int)], charupdated;
-	uint8_t * dataptr;
+	for(*index_of_data; *index_of_data < length;){
 
-	dataptr = data;
-
-	for(int i = 0; data[i] != '\0' && done == 0; i++){
-
-		switch(caseID){
-			case 0:
-				if(data[i] == ','){
-					caseID ++;
-					sscanf(idchar, "%d", id);
-					memset(&idchar[0], 0, sizeof(idchar));
-					index = 0;
-					break;
-				}
-				idchar[index++] = data[i];
-				break;
-
-			case 1:
-				if(data[i] == ','){
-					caseID ++;
-					temp_desc[index] = '\0'; //To make sure the char array ends here and not with some strange characters
-					strcpy(description, temp_desc);
-					memset(&temp_desc[0], 0, sizeof(temp_desc));
-					index = 0;
-					break;
-				}
-				temp_desc[index++] = data[i];
-				break;
-
-			case 2:
-				if(data[i] == ','){
-					caseID ++;
-					temp_type[index] = '\0'; //To make sure the char array ends here and not with some strange characters
-					strcpy(datatype, temp_type);
-					memset(&temp_type[0], 0, sizeof(temp_type));
-					index = 0;
-					break;
-				}
-				temp_type[index++] = data[i];
-				break;
-
-			case 3:
-				if(data[i] == ','){
-					caseID ++;
-					sscanf(sizechar, "%d", size);
-					memset(&sizechar[0], 0, sizeof(sizechar));
-					index = 0;
-					break;
-				}
-				sizechar[index++] = data[i];
-				break;
-
-			case 4:
-				if(data[i] == ','){
-					caseID ++;
-					sscanf(valuechar, "%d", value);
-					memset(&valuechar[0], 0, sizeof(valuechar));
-					index = 0;
-					break;
-				}
-				valuechar[index++] = data[i];
-				break;
-
-			case 5:
-				if(data[i] == ','){
-					caseID ++;
-					*updated = charupdated != '0';
-					memset(&charupdated, 0, sizeof(charupdated));
-					break;
-				}
-				charupdated = data[i];
-				break;
-
-			case 6:
-				if(data[i] == '\0'){
-					done = 0;
-					break;
-				}
-				dataptr = &data[i];
-				done = 1;
-				break;
-
-			default:
-				printf("Default\n");
+		parameter->id = data[*index_of_data++]; //set parameter id
+		for(int i = 0; data[*index_of_data] != '\0'; i++){
+			parameter->description[i] = data[*index_of_data++]; // fill parameter->description char
 		}
+		parameter->datatype = data[*indexofdata++]; //set parameter datatype
+		for(int i = 0; i < 4; i++){
+			fourBytesUnion.u8bytes[i] = data[*index_of_data++];
+		}
+		parameter->offset = fourBytesUnion.u32bytes; //set parameter offset
+		for(int i = 0; i < 4; i++){
+			fourBytesUnion.i8bytes[i] = data[*index_of_data++];
+		}
+		if(parameter->datatype != f32)
+			parameter->value.intvalue = fourBytesUnion.i32bytes; //set parameter value if not float
+		else
+			parameter->value.floatvalue = fourBytesUnion.fbytes; //set parameter value if float
+		parameter->updated = data[*index_of_data++]; //set parameter updated
 	}
 
-	if(done == 0)
-		return NULL;
-	return dataptr;
 
 }
 
@@ -152,43 +75,25 @@ void addValues(uint8_t * data, int length){
   bzero(serialized_list_bytes, JSON_MAX_SIZE);
 
 	int size = getValuesFromJson(json_object_list);
-	parameter_t par_list[JSON_OBJ_LIST_SIZE];
+	parameter_t parameterlist[JSON_OBJ_LIST_SIZE];
 
 	for(int i = 0; i < size; i++){
 
-		par_list[i].id = json_object_get_int(json_object_list[i*(size + 1) + ID_INDEX]);
-		par_list[i].description = json_object_get_string(json_object_list[i*(size + 1) + DESC_INDEX]);
-		par_list[i].type = json_object_get_string(json_object_list[i*(size + 1) + TYPE_INDEX]);
-		par_list[i].size = json_object_get_int(json_object_list[i*(size + 1) + SIZE_INDEX]);
-		if(par_list[i].id != 4)
-			par_list[i].value.intvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
+		parameterlist[i].id = json_object_get_int(json_object_list[i*(size + 1) + ID_INDEX]);
+		parameterlist[i].description = json_object_get_string(json_object_list[i*(size + 1) + DESC_INDEX]);
+		parameterlist[i].datatype = json_object_get_int(json_object_list[i*(size + 1) + TYPE_INDEX]);
+		parameterlist[i].offset = json_object_get_int(json_object_list[i*(size + 1) + OFFSET_INDEX]);
+		if(parameterlist[i].id != 4)
+			parameterlist[i].value.intvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
 		else
-		par_list[i].value.floatvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
-		par_list[i].updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
+		parameterlist[i].value.floatvalue = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
+		parameterlist[i].updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
 	}
 
 	for(int i = 0; i < length;){ // Here we will read the output of the server and look at which ID's and value he sent us
 		for(int j = 0; j<size; j++){
-			if(data[i] == par_list[j].id){
-
-				printf("match found: %d\n", par_list[j].id);
-				if(strcmp("uint8_t",par_list[j].type) == 0){
-					par_list[j].value.intvalue = data[i+1];
-					i += 2*sizeof(uint8_t); // 1 byte for id and 1 byte for value
-
-				}else{
-					for(int k = 0; k < 4; k++){
-						fourBytesUnion.u8bytes[k] = data[i+1+k]; //fill the uint8_t [4] array with the next 4 bytes to get the uint32_t or the float
-					}
-
-					if(strcmp("uint32_t",par_list[j].type) == 0){
-						par_list[j].value.intvalue = fourBytesUnion.u32bytes;
-					}else{
-						par_list[j].value.floatvalue = fourBytesUnion.fbytes;
-						printf("float value: %f\n", par_list[j].value.floatvalue);
-					}
-					i += (sizeof(uint8_t) + sizeof(uint32_t));
-				}
+			if(data[i] == parameterlist[j].id){
+				set_value_in_parameter_struct(&parameterlist[j], data, &i);
 			}
 		}
 	}
@@ -196,15 +101,15 @@ void addValues(uint8_t * data, int length){
 	for(int i = 0; i < size; i++){
 
 		bzero(temp_serialized_list, JSON_OBJ_LIST_SIZE);
-		int id = par_list[i].id;
-		const char * description = par_list[i].description;
-		const char * type = par_list[i].type;
-		int size = par_list[i].size;
-		bool updated = par_list[i].updated;
-		if(id != 4)
-			sprintf(temp_serialized_list,"%d,%s,%s,%d,%d,%d,", id, description, type, size, par_list[i].value.intvalue, updated); // puts variables in string
+		int id = parameterlist[i].id;
+		const char * description = parameterlist[i].description;
+		int datatype = parameterlist[i].datatype;
+		int offset = parameterlist[i].offset;
+		bool updated = parameterlist[i].updated;
+		if(datatype != f32)
+			sprintf(temp_serialized_list,"%d,%s,%d,%d,%d,%d,", id, description, datatype, offset, par_list[i].value.intvalue, updated); // puts variables in string
 		else
-			sprintf(temp_serialized_list,"%d,%s,%s,%d,%f,%d,", id, description, type, size, par_list[i].value.floatvalue, updated); // puts variables in string
+			sprintf(temp_serialized_list,"%d,%s,%d,%d,%f,%d,", id, description, datatype, offset, par_list[i].value.floatvalue, updated); // puts variables in string
 		if(i == 0)
 			strcpy(serialized_list, temp_serialized_list);
 		else
@@ -220,7 +125,42 @@ void addValues(uint8_t * data, int length){
 	free(serialized_list);
 	free(serialized_list_bytes);
 
+}
 
+void set_value_in_parameter_struct(parameter_t * parameter, uint8_t * data, int * index_of_data){
+	switch(parameter->datatype){
+		case u8:
+			parameter->value.intvalue = data[*index_of_data];
+			break;
+		case i8:
+			parameter->value.intvalue = data[*index_of_data];
+			break;
+		case u16:
+			fourBytesUnion.u8bytes[0] = data[*index_of_data++];
+			fourBytesUnion.u8bytes[1] = data[*index_of_data++];
+			parameter->value.intvalue = fourBytesUnion.u16bytes;
+			break;
+		case i16:
+		fourBytesUnion.i8bytes[0] = data[*index_of_data++];
+			fourBytesUnion.i8bytes[1] = data[*index_of_data++];
+			parameter->value.intvalue = fourBytesUnion.i16bytes;
+			break;
+		case u32:
+			for(int i = 0; i < 4; i++){
+				fourBytesUnion.u8bytes[i] = data[*index_of_data++];
+			}
+			parameter->value.intvalue = fourBytesUnion.u32bytes;
+		case i32:
+		for(int i = 0; i < 4; i++){
+			fourBytesUnion.i8bytes[i] = data[*index_of_data++];
+		}
+		parameter->value.intvalue = fourBytesUnion.i32bytes;
+		case f32:
+		for(int i = 0; i < 4; i++){
+			fourBytesUnion.u8bytes[i] = data[*index_of_data++];
+		}
+		parameter->value.floatvalue = fourBytesUnion.fbytes;
+	}
 }
 
 void setUpdated(int amountOfIds){
@@ -240,12 +180,11 @@ void setUpdated(int amountOfIds){
 		bzero(temp_serialized_list, JSON_OBJ_LIST_SIZE);
 		int par_id = json_object_get_int(json_object_list[i*(size+1) + ID_INDEX]);
 		const char * description = json_object_get_string(json_object_list[i*(size + 1) + DESC_INDEX]);
-		const char * type = json_object_get_string(json_object_list[i*(size + 1) + TYPE_INDEX]);
-		int data_size = json_object_get_int(json_object_list[i*(size + 1) + SIZE_INDEX]);
+		int datatype = json_object_get_int(json_object_list[i*(size + 1) + TYPE_INDEX]);
+		int offset = json_object_get_int(json_object_list[i*(size + 1) + OFFSET_INDEX]);
 		int value = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
 		bool updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
 
-		//printf("%d\n", __LINE__);
 		for(int j = 0; j < amountOfIds; j++){
 			printf("par_id: %d\t idArray: %d\n", par_id, idArray[j]);
 			if(idArray[j] == par_id){
@@ -253,7 +192,7 @@ void setUpdated(int amountOfIds){
 			}
 		}
 
-		sprintf(temp_serialized_list,"%d,%s,%s,%d,%d,%d,", par_id, description, type, data_size, value, updated); // puts variables in string
+		sprintf(temp_serialized_list,"%d,%s,%d,%d,%d,%d,", par_id, description, type, offset, value, updated); // puts variables in string
 
 		if(size == 0)
 			strcpy(serialized_list, temp_serialized_list);
@@ -284,13 +223,12 @@ void print_list()
 	for(int i = 0; i < size; i++){ //for each id, get the values out of the list of pointers
 		int par_id = json_object_get_int(json_object_list[i*(size + 1) + ID_INDEX]);
 		const char * description = json_object_get_string(json_object_list[i*(size + 1) + DESC_INDEX]);
-		const char * type = json_object_get_string(json_object_list[i*(size + 1) + TYPE_INDEX]);
-		int data_size = json_object_get_int(json_object_list[i*(size + 1) + SIZE_INDEX]);
+		int datatype = json_object_get_int(json_object_list[i*(size + 1) + TYPE_INDEX]);
+		int offset = json_object_get_int(json_object_list[i*(size + 1) + OFFSET_INDEX]);
 		int value = json_object_get_int(json_object_list[i*(size + 1) + VALUE_INDEX]);
-		int updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
+		bool updated = json_object_get_int(json_object_list[i*(size + 1) + UPDATED_INDEX]);
 
-
-		printf(" %d \t | %s \t | %s \t | %d \t\t | %d \t \n",par_id,description,type,data_size, value); //printing the list
+		printf(" %d \t | %s \t | %d \t | %d \t | %d \t | %d \t \n",par_id, description, datatype, offset, value, updated); //printing the list
 
 	}
 }
@@ -304,7 +242,7 @@ int getValuesFromJson(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE])
 	struct json_object *id;
 	struct json_object *description;
 	struct json_object *type;
-	struct json_object *size;
+	struct json_object *offset;
 	struct json_object *value;
 	struct json_object *updated;
 	FILE *fptr;
@@ -332,7 +270,7 @@ int getValuesFromJson(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE])
 		json_object_object_get_ex(parameter, "id" , &id);
 		json_object_object_get_ex(parameter, "description" , &description);
 		json_object_object_get_ex(parameter, "type" , &type);
-		json_object_object_get_ex(parameter, "size" , &size);
+		json_object_object_get_ex(parameter, "offset" , &offset);
 		json_object_object_get_ex(parameter, "value" , &value);
 		json_object_object_get_ex(parameter, "updated" , &updated);
 
@@ -340,7 +278,7 @@ int getValuesFromJson(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE])
 		json_object_list[i*(array_size + 1) + ID_INDEX] = id;
 		json_object_list[i*(array_size + 1) + DESC_INDEX] = description;
 		json_object_list[i*(array_size + 1) + TYPE_INDEX] = type;
-		json_object_list[i*(array_size + 1) + SIZE_INDEX] = size;
+		json_object_list[i*(array_size + 1) + OFFSET_INDEX] = offset;
 		json_object_list[i*(array_size + 1) + VALUE_INDEX] = value;
 		json_object_list[i*(array_size + 1) + UPDATED_INDEX] = updated;
 	}
@@ -355,17 +293,17 @@ geupdate is, als deze geupdate is (receiving 1 terug) dan gaan we de parameterli
 */
 
 
-const char* get_type(uint8_t par_id)
+int get_type(uint8_t par_id)
 {
 	int found = 0;
 	char buffer[JSON_MAX_SIZE];
-	const char * typechar;
+	int type;
 	int array_size;
 	int succes;
 	struct json_object *parameter_array;
 	struct json_object *parameter;
 	struct json_object *id;
-	struct json_object *type;
+	struct json_object *datatype;
 
 	// File openen en naar buffer
 	FILE *fptr = fopen("parameters.json" , "r");
@@ -391,12 +329,12 @@ const char* get_type(uint8_t par_id)
 		search_id = json_object_get_int(id);
 		if(par_id == search_id)
 		{
-			json_object_object_get_ex(parameter, "type" , &type);
+			json_object_object_get_ex(parameter, "datatype" , &datatype);
 			i = array_size;
-			typechar = json_object_get_string(type);
+			type = json_object_get_int(datatype);
 			found = 1;
 		}
 	}
 	json_object_put(parsed_json);
-	return typechar;
+	return type;
 }

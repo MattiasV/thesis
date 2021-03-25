@@ -58,6 +58,7 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 
 	for(int i = 0; i < length; i++){
 		packet->data[i] = bytesToSend[i];
+		printf("bytesToSend[%d]: %d\n", i, bytesToSend[i]);
 	}
 	packet->length = length;
 
@@ -97,7 +98,7 @@ void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 			addValues(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
-			store_list(data);
+			store_list(data, packet->length -1);
 			break;
 		case REFRESH_ID:
 			checkRefresh(data[0]);

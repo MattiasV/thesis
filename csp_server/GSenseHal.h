@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <stdbool.h>
+
 
 // We convert 0x100 to int example 0x100 = 256
 typedef enum{

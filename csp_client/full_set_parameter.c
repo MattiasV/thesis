@@ -30,78 +30,76 @@ int main(int argc, char* argv[])
 	idArray = malloc(size/2);
 
 	bytesToSend[0] = SET_ID;
+	int byteindex = 1; //start at index 1 because SET_ID is on 0
+	for(int i = 1; i < size; i += 2){
 
-	for(int i = 0; i < size; i += 2){
-
-		uint8_t parameterId = atoi(argv[i]);
-		const char* type = get_type(parameterId);
+		uint8_t id = atoi(argv[i]);
+		int type = get_type(id);
 		//printf("parameterId: %d, type: %s\n",parameterId, type);
 
-		if(strcmp("UNKNOWN",type) == 0)
+		if(type == 0)
 		{
 			printf("PARAMETER is unknown, try again \n");
 		}
 
-		if(strcmp("uint8_t",type) == 0)
+		if(type <= 2)
 		{
-			int parameterCheck = atoi(argv[i+1]);
+			int value = atoi(argv[i+1]);
 			//printf("parameterCheck: %d\n", parameterCheck);
-			if(parameterCheck <= 255 && parameterCheck >= 0)
-			{
-				uint8_t argvSending[2];
-				bzero(&argvSending, sizeof(argvSending));
-				uint8_t id, value;
-				sscanf(argv[i], "%hhd", &id);
-				sscanf(argv[i+1], "%hhd", &value);
-				idArray[i/2] = id;
-				argvSending[0] = id;
-				argvSending[1] = value;
-				memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
-				length += 2;
-			}
-			else
-			{
-				printf("Not a valid uint8 value with current id: %d\n", parameterId);
-			}
-		}
 
-		if(strcmp("uint32_t",type) == 0)
-		{
-			int parameterCheck = atoi(argv[1]);
-			if(parameterCheck >= 0)
-			{
-				uint32_t argvSending[2];
-				uint8_t id;
-				uint32_t value;
-				sscanf(argv[i], "%hhd", &id);
-				sscanf(argv[i+1], "%d", &value);
-				idArray[i/2] = id;
-				argvSending[0] = id;
-				argvSending[1] = value;
-				memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
-				length += 5;
-			}
-			else
-			{
-				printf("Not a valid uint32 value with current id: %d\n", parameterId);
-			}
-		}
-
-		if(strcmp("float",type) == 0)
-		{
-
-			float argvSending[2];
-			uint8_t id;
-			float value;
-			sscanf(argv[i], "%hhd", &id);
-			sscanf(argv[i+1], "%f", &value);
 			idArray[i/2] = id;
-			argvSending[0] = id;
-			argvSending[1] = value;
-			memcpy(bytesToSend+i+1, argvSending, sizeof(argvSending));
-			length += 5;
+			bytesToSend[byteindex++] = id;
+			length++;
+			bytesToSend[byteindex++] = value
+			length++;
+		}
+
+		else if(type > 2 && type <= 4)
+		{
+			int value = atoi(argv[i]);
+			idArray[i/2] = id;
+			bytesToSend[byteindex++] = id;
+			length++;
+			if(value >= 0)
+				fourBytesUnion.u16bytes[0] = value;
+			else
+				fourBytesUnion.i16bytes[0] = value;
+			for(int j = 0; j < 2; j++){
+				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
+				length++
+			}
+		}
+
+		else if(type > 4 && type <= 6)
+		{
+			int value = atoi(argv[i]);
+			idArray[i/2] = id;
+			bytesToSend[byteindex++] = id;
+			length++;
+			if(value >= 0)
+				fourBytesUnion.u32bytes[0] = value;
+			else
+				fourBytesUnion.i32bytes[0] = value;
+			for(int j = 0; j < 4; j++){
+				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
+				length++;
+			}
+		}
+
+		if(type == 7)
+		{
+			float value = atoi(argv[i]);
+			idArray[i/2] = id;
+			bytesToSend[byteindex++] = id;
+			length++;
+			fourBytesUnion.fbytes = value;
+			for(int j = 0; j < 4; j++){
+				bytesToSend[index++] = fourBytesUnion.u8bytes[j];
+				length++;
+			}
 		}
 	}
+
 	sendToServer(bytesToSend, length, size/2);
 	free(bytesToSend);
 	return 0;

@@ -9,18 +9,21 @@
 
 union{
   uint8_t u8bytes[4];
+  int8_t i8bytes[4];
   uint16_t u16bytes[2];
+  int16_t i16bytes[2];
   uint32_t u32bytes;
+  int32_t i32bytes;
   float fbytes;
 }fourBytesUnion;
 
 typedef struct {
-  int id;
+  uint8_t id;
   const char * description;
-  const char * type;
-  int size;
+  enum {none=0,u8=1,i8=2,u16=3,i16=4,u32=5,i32=6,f32=7} datatype;
+  uint32_t offset;
   union{
-    int intvalue;
+    int32_t intvalue;
     float floatvalue;
   }value;
   bool updated;

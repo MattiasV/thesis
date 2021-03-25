@@ -235,14 +235,14 @@ int setRegister_float (uio_register_t parameter, float value)
 {
 	return 14;
 	printf("Here to implement uio/mem register with float \n");
-	printf("Offsett needed %d with value %f .\n",parameter,value);
+	printf("Offset needed %d with value %f .\n",parameter,value);
 	return MMAP_ERROR;
 }
 
 float getRegister_float (uio_register_t parameter)
 {
 	return 15;
-	printf("Value needed at offsett %d \n", parameter);
+	printf("Value needed at offset %d \n", parameter);
 	// TODO : De waarde van het register terug sturen
 	float testVal = 4.21f;
 	return testVal;

@@ -21,7 +21,7 @@
 #define ID_INDEX 0
 #define DESC_INDEX 1
 #define TYPE_INDEX 2
-#define SIZE_INDEX 3
+#define OFFSET_INDEX 3
 #define VALUE_INDEX 4
 #define UPDATED_INDEX 5
 
@@ -29,11 +29,11 @@
 struct json_object * parsed_json;
 
 void store_list(uint8_t * data);
-uint8_t * getDataString(int * id, char description[20], char datatype[20], int * size, int * value, bool * updated, uint8_t * data);
-int getValuesFromJson(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE]);
-void addValues(uint8_t * data, int length);
-void setUpdated(int amountOfIds);
+uint8_t * get_data_in_parameterlist(parameter_t * parameter, uint8_t * data, int length, int * index_of_data);
+int get_values_from_json(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE]);
+void add_values(uint8_t * data, int length);
+void set_updated(int amountOfIds);
 void print_list();
-
+int get_type(uint8_t par_id);
 
 #endif // _JSONFUNCTIONS_H_
