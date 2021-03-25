@@ -17,6 +17,8 @@
 #define MY_ADDRESS  1			// Address of local CSP node
 #define IP "0.0.0.0"      // Not important for server, IP gets updated to client IP each time it receives from a client
 #define MAX_PACKET_SIZE 512   //512 Bytes is the max packet size.
+#define TIMEOUT 1000
+
 
 // Global variables
 static csp_iface_t iface;

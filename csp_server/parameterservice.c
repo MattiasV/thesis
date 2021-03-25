@@ -41,7 +41,7 @@ void convert_parameter_list()
 
 int get_parameter_list_size()
 {
-	int list_size = sizeof(parameter_list);
+	int list_size = sizeof(parameterlist);
 	csp_buffer_init(1,1);
 	csp_packet_t * packet;
 	packet = csp_buffer_get(1);
@@ -49,7 +49,7 @@ int get_parameter_list_size()
 	packet->length = 1;
 	printf("De grootte van de parameterlist bedraagt %d bytes \n", list_size);
 
-	csp_if_udp_tx(&iface, packet, 1000);
+	csp_if_udp_tx(&iface, packet, TIMEOUT);
 	return list_size;
 }
 
@@ -74,12 +74,12 @@ void listen_in(uint8_t * data, int length)
 		case SET_ID:
 			printf("We gaan een parameter instellen \n");
 			data = &data[1];
-			set_parameter(data, length);
+			set_parameter(data, length-1);
 			break;
 		case GET_ID:
 			printf("We gaan een parameter opvragen \n");
 			data = &data[1];
-			get_parameter(data, length);
+			get_parameter(data, length-1);
 			break;
 		case SIZE_ID:
 			printf("We gaan de grootte van de parameterlijst opvragen \n");
@@ -99,7 +99,7 @@ void send_refresh()
 	packet = csp_buffer_get(1);
 	packet->data[0] = refresh;
 	packet->length = 1;
-	csp_if_udp_tx(&iface, packet, 1000);
+	csp_if_udp_tx(&iface, packet, TIMEOUT);
 }
 
 // Send parameter list to client
@@ -112,7 +112,7 @@ void send_parameter_list()
 void set_parameter(uint8_t * data, int length)
 {
 	uint8_t par_id;
-	int amount_of_paramters = sizeof(parameter_list)/sizeof(parameter_t);
+	int amount_of_paramters = sizeof(parameterlist)/sizeof(parameter_t);
 
 	// for loopje met de length van het packet
 	for(int i = 0; i <= length;){
@@ -133,18 +133,18 @@ void set_parameter(uint8_t * data, int length)
 	packet = csp_buffer_get(1);
 	packet->data[0] = data[0]; // packet->data[0] = SET_ID
 	packet->length = 1;
-	csp_if_udp_tx(&iface, packet, 1000);
+	csp_if_udp_tx(&iface, packet, TIMEOUT);
 
 }
 
 void check_type_and_set_register(int * index, uint8_t * data, int type, int offset){
 	switch(type){
 		case u8:
-			setRegister_uint8(offset, data[*index]);
+			setRegister_8(offset, data[*index]);
 			*index++; //set index on next ID
 			break;
 		case i8:
-			setRegister_uint8(offset, data[*index]);
+			setRegister_8(offset, data[*index]);
 			*index++;
 			break;
 		case u16:
@@ -152,35 +152,35 @@ void check_type_and_set_register(int * index, uint8_t * data, int type, int offs
 			*index ++;
 			fourBytesUnion.u8bytes[1] = data[*index];
 			*index++;
-			setRegister_uint16(offset, fourBytesUnion.u16bytes);
+			setRegister_16(offset, fourBytesUnion.u16bytes);
 			break;
 		case i16:
 			fourBytesUnion.u8bytes[0] = data[*index];
 			*index ++;
 			fourBytesUnion.i8bytes[1] = data[*index];
 			*index++;
-			setRegister_uint16(offset, fourBytesUnion.i16bytes);
+			setRegister_16(offset, fourBytesUnion.i16bytes);
 			break;
 		case u32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[*index];
 				*index++;
 			}
-			setRegister_uint32(offset, fourBytesUnion.u32bytes);
+			setRegister_32(offset, fourBytesUnion.u32bytes);
 			break;
 		case i32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.i8bytes[i] = data[*index];
 				*index++;
 			}
-			setRegister_uint32(offset, fourBytesUnion.i32bytes);
+			setRegister_32(offset, fourBytesUnion.i32bytes);
 			break;
 		case f32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[*index];
 				*index++;
 			}
-			setRegister_uint32(offset, fourBytesUnion.ufbytes);
+			setRegister_32(offset, fourBytesUnion.ufbytes);
 			break;
 	}
 }
@@ -195,52 +195,46 @@ void get_parameter(uint8_t * data, int length)
 	float recvfl;
 	float sendbuffl[1];
 
-	csp_buffer_init(1,4);
+	csp_buffer_init(1,(1+4)*length; //1 for each ID and 4 for the max amount of bytes in a value
 	csp_packet_t * packet;
-	packet = csp_buffer_get(4);
+	packet = csp_buffer_get((1+4)*length);
+
+	int amount_of_paramters = sizeof(parameterlist)/sizeof(parameter_t);
 
 	int index = 0;
+
 	for(int i = 0; i < length; i++){
+		for(int j = 0; j < amount_of_paramters; j++){
 
-
-
-		// NEED TO BE REWRITTEN
-		// IS STILL HARD CODED, HAS TO BE SYNCHRONIZED WITH THE PARAMETERLIST STRUCT
-
-		switch(data[i])
-		{
-			case 0:
-				printf("Case 0 : Retrieving version number \n");
-				break;
-			case 1:
-				printf("Case 1 : Retrieving Firmware DESC \n");
-				break;
-			case 2:
-				printf("Case 2 : Retrieving Value of LED \n");
-				recv8 = getRegister_uint8(LED_CTRL);
-				packet->data[index] = recv8;
-				packet->length += 1;
-				index ++;
-				break;
-			case 3:
-				printf("Case 3 : Retrieving camctrl uint32\n");
-				recv32 = getRegister_uint32(CAM_CTRL);
-				fourBytesUnion.u32bytes = 0;
-				packet->data32[0] = recv32;
-				packet->length = 4;
-				csp_if_udp_tx(&iface, packet, 1000);
-				break;
-			case 4:
-				printf("Case 4 : Retrieving float test \n");
-				recvfl = getRegister_float(FLOAT_TEST);
-				packet->data32[0] = recvfl;
-				packet->length = 4;
-				csp_if_udp_tx(&iface, packet, 1000);
-				break;
-			default:
-				printf("Default case aangesproken \n");
-				break;
+			if(parameterlist[j] == data[i]){
+				int sizereturnedvalue = check_type_and_get_register(parameterlist[j].datatype, parameterlist[j].offset);
+				for(int k = 0; k < sizereturnedvalue; k++){
+					packet->data[index] = fourBytesUnion.u8bytes[k];
+					index++;
+				}
+			}
 		}
+	}
+	packet->length = index;
+	csp_if_udp_tx(&iface, packet, TIMEOUT);
 
+}
+
+int check_type_and_get_register(int datatype, int offset){
+	switch(type){
+		case u8:
+			return getRegister_8(offset);
+		case i8:
+			return getRegister_8(offset);
+		case u16:
+			return getRegister_16(offset);
+		case i16:
+			return getRegister_16(offset);
+		case u32:
+			return getRegister_32(offset);
+		case i32:
+			return getRegister_32(offset);
+		case f32:
+			return getRegister_32(offset);
 	}
 }
