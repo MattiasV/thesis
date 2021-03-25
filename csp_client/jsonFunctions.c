@@ -63,7 +63,7 @@ uint8_t * get_data_in_parameterlist(parameter_t * parameter, uint8_t * data, int
 	}
 }
 
-void addValues(uint8_t * data, int length){
+void add_values(uint8_t * data, int length){
 
 	struct json_object * json_object_list[JSON_OBJ_LIST_SIZE];
 	char * serialized_list = malloc(JSON_MAX_SIZE); // this is the list where all the variables will be stored as a string.
@@ -161,7 +161,7 @@ void set_value_in_parameter_struct(parameter_t * parameter, uint8_t * data, int 
 	}
 }
 
-void setUpdated(int amountOfIds){
+void set_updated(int amountOfIds){
 
 	struct json_object * json_object_list[JSON_OBJ_LIST_SIZE];
 	char * serialized_list = malloc(JSON_MAX_SIZE); // this is the list where all the variables will be stored as a string.
@@ -231,7 +231,7 @@ void print_list()
 	}
 }
 
-int getValuesFromJson(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE]){ // open json file, read all the json_objects and put them in the json_object pointer lists
+int get_values_from_json(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE]){ // open json file, read all the json_objects and put them in the json_object pointer lists
 	char buffer[JSON_MAX_SIZE];
 	int array_size;
 	int succes;
