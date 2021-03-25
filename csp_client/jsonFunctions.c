@@ -61,8 +61,6 @@ uint8_t * get_data_in_parameterlist(parameter_t * parameter, uint8_t * data, int
 			parameter->value.floatvalue = fourBytesUnion.fbytes; //set parameter value if float
 		parameter->updated = data[*index_of_data++]; //set parameter updated
 	}
-
-
 }
 
 void addValues(uint8_t * data, int length){
@@ -107,9 +105,9 @@ void addValues(uint8_t * data, int length){
 		int offset = parameterlist[i].offset;
 		bool updated = parameterlist[i].updated;
 		if(datatype != f32)
-			sprintf(temp_serialized_list,"%d,%s,%d,%d,%d,%d,", id, description, datatype, offset, par_list[i].value.intvalue, updated); // puts variables in string
+			sprintf(temp_serialized_list,"%d,%s,%d,%d,%d,%d,", id, description, datatype, offset, parameterlist[i].value.intvalue, updated); // puts variables in string
 		else
-			sprintf(temp_serialized_list,"%d,%s,%d,%d,%f,%d,", id, description, datatype, offset, par_list[i].value.floatvalue, updated); // puts variables in string
+			sprintf(temp_serialized_list,"%d,%s,%d,%d,%f,%d,", id, description, datatype, offset, parameterlist[i].value.floatvalue, updated); // puts variables in string
 		if(i == 0)
 			strcpy(serialized_list, temp_serialized_list);
 		else
