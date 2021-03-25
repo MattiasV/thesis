@@ -112,45 +112,20 @@ void send_parameter_list()
 void set_parameter(uint8_t * data, int length)
 {
 	uint8_t par_id;
+	int amount_of_paramters = sizeof(parameter_list)/sizeof(parameter_t);
+
 	// for loopje met de length van het packet
-	for(int i = 1; i <= length;){
+	for(int i = 0; i <= length;){
+
 		par_id = data[i];
 		printf("par_id: %d\n", par_id);
-		switch(par_id)
-		{
-			case 0:
-				printf("Case 0 : Version NR nothing to set \n");
-				break;
-			case 1:
-				printf("Case 1 : Firmware DESC nothing to set \n");
-				break;
-			case 2:
-				printf("Case 2 : uint8 gebruiken \n");
-				uint8_t val8 = data[i+1];
-				setRegister_uint8(LED_CTRL, val8);
-				i += 1 + sizeof(val8); //Set i to the next id
-				break;
-			case 3:
-				printf("Case 3 : uint32 gebruiken \n");
-				for(int j=0; j < 4; j++){
-					fourBytesUnion.u8bytes[j] = data[j+i+1];
-				}
-				uint32_t val32 = fourBytesUnion.u32bytes;
-				setRegister_uint32(CAM_CTRL, val32);
-				i += 1 + sizeof(val32);
-				break;
-			case 4:
-				printf("Case 4 : float gebruiken \n");
-				for(int j=0; j < 4; j++){
-					fourBytesUnion.u8bytes[j] = data[j+i+1];
-				}
-				uint32_t valf = fourBytesUnion.fbytes;
-				setRegister_float(FLOAT_TEST, valf);
-				i += 1 + sizeof(valf);
-				break;
-			default:
-				printf("Default case aangesproken \n");
-				break;
+
+		for(int j = 0; j < amount_of_paramters; j++){
+
+			if(parameterlist[j].id == par_id){
+				i++; //set the index on the first value byte of data[]
+				check_type_and_set_register(&i, data, parameterlist[j].datatype, parameterlist[j].offset);
+			}
 		}
 	}
 
@@ -160,6 +135,54 @@ void set_parameter(uint8_t * data, int length)
 	packet->length = 1;
 	csp_if_udp_tx(&iface, packet, 1000);
 
+}
+
+void check_type_and_set_register(int * index, uint8_t * data, int type, int offset){
+	switch(type){
+		case u8:
+			setRegister_uint8(offset, data[*index]);
+			*index++; //set index on next ID
+			break;
+		case i8:
+			setRegister_uint8(offset, data[*index]);
+			*index++;
+			break;
+		case u16:
+			fourBytesUnion.u8bytes[0] = data[*index];
+			*index ++;
+			fourBytesUnion.u8bytes[1] = data[*index];
+			*index++;
+			setRegister_uint16(offset, fourBytesUnion.u16bytes);
+			break;
+		case i16:
+			fourBytesUnion.u8bytes[0] = data[*index];
+			*index ++;
+			fourBytesUnion.i8bytes[1] = data[*index];
+			*index++;
+			setRegister_uint16(offset, fourBytesUnion.i16bytes);
+			break;
+		case u32:
+			for(int i = 0; i < 4; i++){
+				fourBytesUnion.u8bytes[i] = data[*index];
+				*index++;
+			}
+			setRegister_uint32(offset, fourBytesUnion.u32bytes);
+			break;
+		case i32:
+			for(int i = 0; i < 4; i++){
+				fourBytesUnion.i8bytes[i] = data[*index];
+				*index++;
+			}
+			setRegister_uint32(offset, fourBytesUnion.i32bytes);
+			break;
+		case f32:
+			for(int i = 0; i < 4; i++){
+				fourBytesUnion.u8bytes[i] = data[*index];
+				*index++;
+			}
+			setRegister_uint32(offset, fourBytesUnion.ufbytes);
+			break;
+	}
 }
 
 // Functie om de parameter te gaan lezen van de zynq
@@ -183,7 +206,7 @@ void get_parameter(uint8_t * data, int length)
 
 		// NEED TO BE REWRITTEN
 		// IS STILL HARD CODED, HAS TO BE SYNCHRONIZED WITH THE PARAMETERLIST STRUCT
-		
+
 		switch(data[i])
 		{
 			case 0:
@@ -202,7 +225,7 @@ void get_parameter(uint8_t * data, int length)
 			case 3:
 				printf("Case 3 : Retrieving camctrl uint32\n");
 				recv32 = getRegister_uint32(CAM_CTRL);
-				fourBytesUnion->u32bytes =
+				fourBytesUnion.u32bytes = 0;
 				packet->data32[0] = recv32;
 				packet->length = 4;
 				csp_if_udp_tx(&iface, packet, 1000);

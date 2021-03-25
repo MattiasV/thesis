@@ -17,10 +17,10 @@ typedef enum{
 	FLOAT_TEST = 400,
 }uio_register_t;
 
-
 #define MMAP_ERROR 0
 #define MMAP_NO_ERROR 1
 #define MAP_SIZE 0x10000000
+
 int open_uio();
 
 int setRegister_uint8 (uio_register_t parameter, uint8_t value);

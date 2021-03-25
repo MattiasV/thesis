@@ -31,8 +31,11 @@ int refresh;
 
 union{
   uint8_t u8bytes[4];
+  int8_t i8bytes[4];
   uint16_t u16bytes[2];
+  int16_t i16bytes[2];
   uint32_t u32bytes;
+  int32_t i32bytes;
   float fbytes;
 }fourBytesUnion;
 
@@ -55,6 +58,6 @@ void send_refresh();
 void send_parameter_list();
 void set_parameter(uint8_t * msg, int length);
 void get_parameter(uint8_t * data, int length);
-int get_type(uint8_t);
+void check_type_and_set_register(int * index, uint8_t * data, int type, int offset);
 
 #endif // _PARAMETERSERVICE_H_

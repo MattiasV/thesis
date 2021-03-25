@@ -24,6 +24,6 @@ typedef struct {
     float floatvalue;
   }value;
   bool updated;
-} parameter_list;
+} parameter_t;
 
 #endif // _CONFIG_H_

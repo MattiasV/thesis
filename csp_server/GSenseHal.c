@@ -47,6 +47,40 @@ uint8_t getRegister_uint8(uio_register_t parameter)
 	return result;
 }
 
+int setRegister_uint16(uio_register_t parameter, uint8_t value)
+{
+	uio_fd = open_uio();
+	int offset = parameter;
+
+	write_addr = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
+	if(write_addr == NULL) {
+		printf("Failed to map memory \n");
+		return MMAP_ERROR;
+	}
+
+	write_addr[offset] = value;
+	munmap(write_addr,MAP_SIZE);
+	return MMAP_NO_ERROR;
+}
+
+uint8_t getRegister_uint16(uio_register_t parameter)
+{
+	int uio_fd = open_uio();
+	int offset = parameter;
+
+	address = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
+	if(address == NULL) {
+		printf("Failed to map memory \n");
+	}
+
+	virt_addr = address + offset;
+	read_result = *((unsigned char *) virt_addr);
+	uint8_t result = read_result;
+	munmap(address,MAP_SIZE);
+
+	return result;
+}
+
 int setRegister_uint32 (uio_register_t parameter, uint32_t value)
 {
 	uio_fd = open_uio();
@@ -70,7 +104,7 @@ uint32_t getRegister_uint32 (uio_register_t parameter)
 
 	address = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
 	if(address == NULL) { printf("Failed to map memory \n");}
-	
+
 	virt_addr = address + offset;
 	read_result = *((unsigned char *) virt_addr);
 	uint32_t result = read_result;
