@@ -13,16 +13,20 @@ void *address, *virt_addr;
 unsigned long read_result;
 int uio_fd;
 
-void setRegister_uint8(uio_register_t parameter, uint8_t value)
+int setRegister_uint8(uio_register_t parameter, uint8_t value)
 {
 	uio_fd = open_uio();
 	int offset = parameter;
 
 	write_addr = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
-	if(write_addr == NULL) { printf("Failed to map memory \n");}
+	if(write_addr == NULL) {
+		printf("Failed to map memory \n");
+		return MMAP_ERROR;
+	}
 
 	write_addr[offset] = value;
 	munmap(write_addr,MAP_SIZE);
+	return MMAP_NO_ERROR;
 }
 
 uint8_t getRegister_uint8(uio_register_t parameter)
@@ -31,7 +35,9 @@ uint8_t getRegister_uint8(uio_register_t parameter)
 	int offset = parameter;
 
 	address = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
-	if(address == NULL) { printf("Failed to map memory \n");}
+	if(address == NULL) {
+		printf("Failed to map memory \n");
+	}
 
 	virt_addr = address + offset;
 	read_result = *((unsigned char *) virt_addr);
@@ -41,16 +47,20 @@ uint8_t getRegister_uint8(uio_register_t parameter)
 	return result;
 }
 
-void setRegister_uint32 (uio_register_t parameter, uint32_t value)
+int setRegister_uint32 (uio_register_t parameter, uint32_t value)
 {
 	uio_fd = open_uio();
 	int offset = parameter;
 
 	write_addr = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
-	if(write_addr == NULL) { printf("Failed to map memory \n");}
+	if(write_addr == NULL) {
+		printf("Failed to map memory \n");
+		return MMAP_ERROR;
+	}
 
 	write_addr[offset] = value;
 	munmap(write_addr,MAP_SIZE);
+	return MMAP_NO_ERROR;
 }
 
 uint32_t getRegister_uint32 (uio_register_t parameter)
@@ -60,7 +70,7 @@ uint32_t getRegister_uint32 (uio_register_t parameter)
 
 	address = (unsigned char *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, uio_fd,0);
 	if(address == NULL) { printf("Failed to map memory \n");}
-
+	
 	virt_addr = address + offset;
 	read_result = *((unsigned char *) virt_addr);
 	uint32_t result = read_result;
@@ -71,10 +81,11 @@ uint32_t getRegister_uint32 (uio_register_t parameter)
 	return result;
 }
 
-void setRegister_float (uio_register_t parameter, float value)
+int setRegister_float (uio_register_t parameter, float value)
 {
 	printf("Here to implement uio/mem register with float \n");
 	printf("Offsett needed %d with value %f .\n",parameter,value);
+	return MMAP_ERROR;
 }
 
 float getRegister_float (uio_register_t parameter)

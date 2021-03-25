@@ -17,16 +17,19 @@ typedef enum{
 	FLOAT_TEST = 400,
 }uio_register_t;
 
+
+#define MMAP_ERROR 0
+#define MMAP_NO_ERROR 1
 #define MAP_SIZE 0x10000000
 int open_uio();
 
-void setRegister_uint8 (uio_register_t parameter, uint8_t value);
+int setRegister_uint8 (uio_register_t parameter, uint8_t value);
 uint8_t getRegister_uint8 (uio_register_t parameter);
 
-void setRegister_uint32 (uio_register_t parameter, uint32_t value);
+int setRegister_uint32 (uio_register_t parameter, uint32_t value);
 uint32_t getRegister_uint32 (uio_register_t parameter);
 
-void setRegister_float (uio_register_t parameter, float value);
+int setRegister_float (uio_register_t parameter, float value);
 float getRegister_float (uio_register_t parameter);
 
 #endif // _GSENSEHAL_H_

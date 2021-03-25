@@ -12,7 +12,6 @@
 #include "GSenseHal.h"
 #include "./src/csp_qfifo.h"
 
-
 // Parameter variable
 #define MY_ADDRESS  1			// Address of local CSP node
 #define IP "0.0.0.0"      // Not important for server, IP gets updated to client IP each time it receives from a client
@@ -33,6 +32,25 @@ uint8_t parameter_list_byte[sizeof(parameter_list)];
 #define SET_ID 2
 #define GET_ID 3
 #define SIZE_ID 4
+
+union{
+  uint8_t u8bytes[4];
+  uint16_t u16bytes[2];
+  uint32_t u32bytes;
+  float fbytes;
+}fourBytesUnion;
+
+typedef struct {
+  int id;
+  const char * description;
+  const char * type;
+  int size;
+  union{
+    int intvalue;
+    float floatvalue;
+  }value;
+  bool updated;
+} parameter_list;
 
 // functies
 void initialize_parameters();

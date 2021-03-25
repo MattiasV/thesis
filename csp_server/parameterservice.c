@@ -121,38 +121,56 @@ void send_parameter_list()
 	refresh = 0;
 }
 
-void set_parameter(uint8_t * msg, int length)
+void set_parameter(uint8_t * data, int length)
 {
 	uint8_t par_id;
-	par_id = msg[1];
 	// for loopje met de length van het packet
-	switch(par_id)
-	{
-		case 0:
-			printf("Case 0 : Version NR nothing to set \n");
-			break;
-		case 1:
-			printf("Case 1 : Firmware DESC nothing to set \n");
-			break;
-		case 2:
-			printf("Case 2 : uint8 gebruiken \n");
-			uint8_t val8 = msg[2];
-			setRegister_uint8(LED_CTRL, val8);
-			break;
-		case 3:
-			printf("Case 3 : uint32 gebruiken \n");
-			uint32_t val32 = msg[2] | (msg[3] << 8) | (msg[4] << 16) | (msg[5] << 24);
-			setRegister_uint32(CAM_CTRL, val32);
-			break;
-		case 4:
-			printf("Case 4 : float gebruiken \n");
-			float test = 0.0f;
-			setRegister_float(FLOAT_TEST, test);
-			break;
-		default:
-			printf("Default case aangesproken \n");
-			break;
+	for(int i = 1; i <= length;){
+		par_id = data[i];
+		printf("par_id: %d\n", par_id);
+		switch(par_id)
+		{
+			case 0:
+				printf("Case 0 : Version NR nothing to set \n");
+				break;
+			case 1:
+				printf("Case 1 : Firmware DESC nothing to set \n");
+				break;
+			case 2:
+				printf("Case 2 : uint8 gebruiken \n");
+				uint8_t val8 = data[i+1];
+				setRegister_uint8(LED_CTRL, val8);
+				i += 1 + sizeof(val8); //Set i to the next id
+				break;
+			case 3:
+				printf("Case 3 : uint32 gebruiken \n");
+				for(int j=0; j < 4; j++){
+					fourBytesUnion.u8bytes[j] = data[j+i+1];
+				}
+				uint32_t val32 = fourBytesUnion.u32bytes;
+				setRegister_uint32(CAM_CTRL, val32);
+				i += 1 + sizeof(val32);
+				break;
+			case 4:
+				printf("Case 4 : float gebruiken \n");
+				for(int j=0; j < 4; j++){
+					fourBytesUnion.u8bytes[j] = data[j+i+1];
+				}
+				uint32_t valf = fourBytesUnion.fbytes;
+				setRegister_float(FLOAT_TEST, valf);
+				i += 1 + sizeof(valf);
+				break;
+			default:
+				printf("Default case aangesproken \n");
+				break;
+		}
 	}
+
+	csp_packet_t * packet;
+	packet = csp_buffer_get(1);
+	packet->data[0] = data[0]; // packet->data[0] = SET_ID
+	packet->length = 1;
+	csp_if_udp_tx(&iface, packet, 1000);
 
 }
 
