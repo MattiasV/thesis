@@ -187,38 +187,41 @@ void get_parameter(uint8_t * data, int length)
 	csp_buffer_init(1,4);
 	csp_packet_t * packet;
 	packet = csp_buffer_get(4);
+	for(int i = 0; i < length;){
 
-	switch(atoi(data[0]))
-	{
-		case 0:
-			printf("Case 0 : Retrieving version number \n");
-			break;
-		case 1:
-			printf("Case 1 : Retrieving Firmware DESC \n");
-			break;
-		case 2:
-			printf("Case 2 : Retrieving Value of LED \n");
-			recv8 = getRegister_uint8(LED_CTRL);
-			packet->data[0] = recv8;
-			packet->length = 1;
-			csp_if_udp_tx(&iface, packet, 1000);
-			break;
-		case 3:
-			printf("Case 3 : Retrieving camctrl uint32\n");
-			recv32 = getRegister_uint32(CAM_CTRL);
-			packet->data32[0] = recv32;
-			packet->length = 4;
-			csp_if_udp_tx(&iface, packet, 1000);
-			break;
-		case 4:
-			printf("Case 4 : Retrieving float test \n");
-			recvfl = getRegister_float(FLOAT_TEST);
-			packet->data32[0] = recvfl;
-			packet->length = 4;
-			csp_if_udp_tx(&iface, packet, 1000);
-			break;
-		default:
-			printf("Default case aangesproken \n");
-			break;
+		switch(atoi(data[0]))
+		{
+			case 0:
+				printf("Case 0 : Retrieving version number \n");
+				break;
+			case 1:
+				printf("Case 1 : Retrieving Firmware DESC \n");
+				break;
+			case 2:
+				printf("Case 2 : Retrieving Value of LED \n");
+				recv8 = getRegister_uint8(LED_CTRL);
+				packet->data[0] = recv8;
+				packet->length = 1;
+				csp_if_udp_tx(&iface, packet, 1000);
+				break;
+			case 3:
+				printf("Case 3 : Retrieving camctrl uint32\n");
+				recv32 = getRegister_uint32(CAM_CTRL);
+				packet->data32[0] = recv32;
+				packet->length = 4;
+				csp_if_udp_tx(&iface, packet, 1000);
+				break;
+			case 4:
+				printf("Case 4 : Retrieving float test \n");
+				recvfl = getRegister_float(FLOAT_TEST);
+				packet->data32[0] = recvfl;
+				packet->length = 4;
+				csp_if_udp_tx(&iface, packet, 1000);
+				break;
+			default:
+				printf("Default case aangesproken \n");
+				break;
+		}
+
 	}
 }
