@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "GSenseAPI.h"
-#include "jsonFunctions.h"
+#include "json_functions.h"
+#include "config.h"
 
 int main(int argc, char* argv[])
 {
@@ -50,7 +51,7 @@ int main(int argc, char* argv[])
 			idArray[i/2] = id;
 			bytesToSend[byteindex++] = id;
 			length++;
-			bytesToSend[byteindex++] = value
+			bytesToSend[byteindex++] = value;
 			length++;
 		}
 
@@ -66,7 +67,7 @@ int main(int argc, char* argv[])
 				fourBytesUnion.i16bytes[0] = value;
 			for(int j = 0; j < 2; j++){
 				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
-				length++
+				length++;
 			}
 		}
 
@@ -77,9 +78,9 @@ int main(int argc, char* argv[])
 			bytesToSend[byteindex++] = id;
 			length++;
 			if(value >= 0)
-				fourBytesUnion.u32bytes[0] = value;
+				fourBytesUnion.u32bytes = value;
 			else
-				fourBytesUnion.i32bytes[0] = value;
+				fourBytesUnion.i32bytes = value;
 			for(int j = 0; j < 4; j++){
 				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
 				length++;
@@ -94,13 +95,13 @@ int main(int argc, char* argv[])
 			length++;
 			fourBytesUnion.fbytes = value;
 			for(int j = 0; j < 4; j++){
-				bytesToSend[index++] = fourBytesUnion.u8bytes[j];
+				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
 				length++;
 			}
 		}
 	}
 
-	sendToServer(bytesToSend, length, size/2);
+	send_to_server(bytesToSend, length, size/2);
 	free(bytesToSend);
 	return 0;
 }

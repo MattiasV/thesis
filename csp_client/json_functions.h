@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-
 //json object list sizes
 #define JSON_MAX_SIZE 1024
 #define JSON_OBJ_LIST_SIZE 100
@@ -28,18 +27,6 @@
 
 //global variables
 struct json_object * parsed_json;
-
-struct {
-  char * parameter_key;
-  uint8_t parameter_type;
-} json_parameters[] = {
-  {"id", u8},
-  {"description", s},
-  {"datatype", u8},
-  {"offset", u32},
-  {"value", unk32},
-  {"updated", b}
-};
 
 void store_list_from_bytes(uint8_t * data, int length);
 void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index_of_data);

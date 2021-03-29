@@ -3,7 +3,9 @@
 #include <stdint.h>
 
 #include "GSenseAPI.h"
-#include "jsonFunctions.h"
+#include "json_functions.h"
+#include "config.h"
+
 
 int main(int argc, char* argv[])
 {
@@ -31,9 +33,9 @@ int main(int argc, char* argv[])
 	for(int i = 0; i < size; i ++){
 
 		uint8_t parameterId = atoi(argv[i]);
-		const char* type = get_type(parameterId);
+		int type = get_type(parameterId);
 
-		if(strcmp("UNKNOWN",type) == 0)
+		if(type == 0)
 		{
 			printf("PARAMETER is unknown with current id: %d, try again sending this id again \n", parameterId);
 		}
@@ -45,7 +47,7 @@ int main(int argc, char* argv[])
 	for(int i = 0; i < MAX_GET_BYTES; i++){
 		printf("bytesToSend[%d]: %d\n",i,bytesToSend[i]);
 	}
-	sendToServer(bytesToSend, argc, size);
+	send_to_server(bytesToSend, argc, size);
 
 	free(idArray);
 	free(bytesToSend);
