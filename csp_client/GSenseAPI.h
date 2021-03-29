@@ -15,9 +15,6 @@
 #include <csp/csp_types.h>
 
 #include "./src/csp_qfifo.h"
-#include "config.h"
-#include "jsonFunctions.h"
-
 
 // Communicatiesysteem
 #define REFRESH_ID 0

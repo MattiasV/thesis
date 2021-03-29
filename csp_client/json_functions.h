@@ -1,5 +1,5 @@
-#ifndef _JSONFUNCTIONS_H_
-#define _JSONFUNCTIONS_H_
+#ifndef _JSON_FUNCTIONS_H_
+#define _JSON_FUNCTIONS_H_
 
 #include <stdint.h>
 #include <json-c/json.h>
@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
-#include "GSenseAPI.h"
+
 
 //json object list sizes
 #define JSON_MAX_SIZE 1024
@@ -29,6 +29,18 @@
 //global variables
 struct json_object * parsed_json;
 
+struct {
+  char * parameter_key;
+  uint8_t parameter_type;
+} json_parameters[] = {
+  {"id", u8},
+  {"description", s},
+  {"datatype", u8},
+  {"offset", u32},
+  {"value", unk32},
+  {"updated", b}
+};
+
 void store_list_from_bytes(uint8_t * data, int length);
 void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index_of_data);
 void add_values(uint8_t * data, int length);
@@ -38,4 +50,4 @@ void print_list();
 json_object * get_json_from_file();
 int get_type(uint8_t par_id);
 
-#endif // _JSONFUNCTIONS_H_
+#endif // _JSON_FUNCTIONS_H_

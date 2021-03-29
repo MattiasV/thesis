@@ -20,17 +20,4 @@ union{
   float fbytes;
 }fourBytesUnion;
 
-//keep this synchronized with the server!!!
-struct json_parameters_t{
-  char * parameter_key;
-  uint8_t parameter_type;
-} json_parameters[] = {
-  {"id", u8},
-  {"description", s},
-  {"datatype", u8},
-  {"offset", u32},
-  {"value", unk32},
-  {"updated", b}
-};
-
 #endif // _CONFIG_H_

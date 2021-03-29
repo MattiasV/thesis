@@ -1,5 +1,6 @@
 #include "GSenseAPI.h"
-
+#include "json_functions.h"
+#include "config.h"
 
 // Size van de te zenden berichten
 // 1 byte msg ID , 1 byte PAR_ID, (1-4) bytes value

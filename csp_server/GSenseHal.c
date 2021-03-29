@@ -1,5 +1,4 @@
 #include "GSenseHal.h"
-
 /** 		MEMORY MAPPING
 	0 - 100 	: Version file
 	100 - 200 	: System control file
