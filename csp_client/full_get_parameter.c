@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 		printf("you provided too musch parameters!\n");
 		printf("MAX amount of parameters is %d, you provided %d parameters\n", MAX_GET_BYTES, size);
 	}
+	
 	bytesToSend = malloc(MAX_GET_BYTES);
 	bzero(bytesToSend, MAX_GET_BYTES);
 
@@ -34,7 +35,7 @@ int main(int argc, char* argv[])
 
 		uint8_t parameterId = atoi(argv[i]);
 		int type = get_type(parameterId);
-
+		printf("parameterid: %d\n", parameterId);
 		if(type == 0)
 		{
 			printf("PARAMETER is unknown with current id: %d, try again sending this id again \n", parameterId);
@@ -44,9 +45,9 @@ int main(int argc, char* argv[])
 			bytesToSend[i+1] = parameterId;
 		}
 	}
-	for(int i = 0; i < MAX_GET_BYTES; i++){
-		printf("bytesToSend[%d]: %d\n",i,bytesToSend[i]);
-	}
+	// for(int i = 0; i < MAX_GET_BYTES; i++){
+	// 	printf("bytesToSend[%d]: %d\n",i,bytesToSend[i]);
+	// }
 	send_to_server(bytesToSend, argc, size);
 
 	free(idArray);

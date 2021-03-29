@@ -10,21 +10,23 @@
 
 #include "GSenseHal.h"
 
+enum datatypes {none,u8,i8,u16,i16,u32,i32,f32,c,s,unk32,b};
+
 typedef struct {
-  int id;
+  uint8_t id;
   const char * description;
-  enum {none=0,u8=1,i8=2,u16=3,i16=4,u32=5,i32=6,f32=7} datatype;
-	int offset; //defined in GSenseHal.h
-	int value;
+  enum datatypes datatype;
+	uint32_t offset; //defined in GSenseHal.h
+	int32_t value;
 	bool updated;
 } parameter_t;
 
 const parameter_t parameterlist[] = {
-		{0,"VersionNr", u8	, VERSION_NR },
-		{1,"FirmwareD", u8	,	},
-		{2,"LedCtrl", u8	,	LED_CTRL},
-		{3,"CamCont"	,u32	,	CAM_CTRL},
-		{4,"FloatTest"	,f32	,	FLOAT_TEST}
+		{60,"VersionNr", u8	, VERSION_NR,0,0},
+		{1,"FirmwareD", u8	,0,0,0},
+		{2,"LedCtrl", u8	,	LED_CTRL,0,0},
+		{3,"CamCont"	,u32	,	CAM_CTRL,0,0},
+		{4,"FloatTest"	,f32	,	FLOAT_TEST,0,0}
 };
 
 #endif

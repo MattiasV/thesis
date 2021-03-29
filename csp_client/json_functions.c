@@ -243,11 +243,15 @@ int get_type(uint8_t par_id)
 
 	json_object * jobj = get_json_from_file();
 	int size = json_object_array_length(jobj);
-
+	json_object * jobjparameters = json_object_object_get(jobj, "parameters");
 	for(int i = 0; i < size; i++){
-		int search_id = json_object_get_int(json_object_object_get(jobj,"id"));
+		json_object * jparameter = json_object_array_get_idx(jobjparameters,i);
+		int search_id;
+		search_id = json_object_get_int(json_object_object_get(jparameter,"id"));
+		printf("searchid: %d\n", search_id);
 		if(par_id == search_id)
 		{
+			printf("found\n");
 			type = json_object_get_int(json_object_object_get(jobj, "datatype"));
 		}
 	}

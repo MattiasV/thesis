@@ -30,6 +30,8 @@ int refresh;
 #define GET_ID 3
 #define SIZE_ID 4
 
+#define MAX_DESCRIPTION_SIZE 50
+
 union{
   uint8_t u8bytes[4];
   int8_t i8bytes[4];
@@ -53,7 +55,7 @@ typedef struct {
 } parameter_list;
 
 // functies
-void convert_parameter_list();
+void convert_parameter_list(uint8_t list_in_bytes[]);
 void listen_in();
 void send_refresh();
 void send_parameter_list();

@@ -9,20 +9,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-//json object list sizes
-#define JSON_MAX_SIZE 1024
-#define JSON_OBJ_LIST_SIZE 100
-#define JSON_AMOUNT_OF_PARAMETERS 6
-#define MAX_DESCRIPTION_SIZE 50
-#define MAX_TYPE_SIZE 10
-
-#define ID_INDEX 0
-#define DESC_INDEX 1
-#define TYPE_INDEX 2
-#define OFFSET_INDEX 3
-#define VALUE_INDEX 4
-#define UPDATED_INDEX 5
-
 #define JSON_FLAG JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY
 
 //global variables

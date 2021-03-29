@@ -14,10 +14,13 @@ int main(int argc, char* argv[])
 	{
 		int refresh = load_list();
 	}
+	bytesToSend = malloc(MAX_PRINT_BYTES);
+	bzero(bytesToSend, MAX_PRINT_BYTES);
 
 	download_list();
 
 	print_list();
-
+	
+	free(bytesToSend);
 	return 0;
 }

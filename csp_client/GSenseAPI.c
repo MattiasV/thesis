@@ -20,7 +20,6 @@ void download_list()
 	int length;
 	data[0] = DOWNLOAD_ID;
 	length = sizeof(data);
-
 	send_to_server(data, length, 0);
 
 }
@@ -50,19 +49,19 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	csp_iface_t iface;
 	csp_packet_t * packet;
 
-	iface = init_udp();
+	iface = init_udp(MAX_SET_BYTES);
 	packet = csp_buffer_get(MAX_SET_BYTES);
-
+	printf("data[0]: %d\n", data[0]);
 	for(int i = 0; i < length; i++){
-		packet->data[i] = bytesToSend[i];
-		printf("bytesToSend[%d]: %d\n", i, bytesToSend[i]);
+		packet->data[i] = data[i];
+		printf("bytesToSend[%d]: %d\n", i, data[i]);
 	}
 	packet->length = length;
 
 	//wait for rx thread to be at the reading line
 	csp_sleep_ms(10);
 
-	csp_if_udp_tx(&iface, packet, 1000);
+	//csp_if_udp_tx(&iface, packet, 1000);
 
 	/* receiving packet */
 	csp_packet_t * rxpacket;
@@ -95,6 +94,7 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 			add_values(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
+			printf("downloading\n");
 			store_list_from_bytes(data, packet->length -1);
 			break;
 		case REFRESH_ID:
@@ -103,9 +103,9 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 	}
 }
 
-csp_iface_t init_udp()
+csp_iface_t init_udp(int bytes)
 {
-	if(csp_buffer_init(1, MAX_SET_BYTES)<0)
+	if(csp_buffer_init(1, bytes)<0)
 	printf("could not initialize buffer\n");
 
 	csp_conf_t csp_conf;
