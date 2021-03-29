@@ -16,6 +16,8 @@
 
 #include "./src/csp_qfifo.h"
 #include "config.h"
+#include "jsonFunctions.h"
+
 
 // Communicatiesysteem
 #define REFRESH_ID 0
@@ -55,14 +57,13 @@ uint8_t * idArray;
 // get_parameter functies
 void download_list();
 int load_list();
-void checkRefresh(uint8_t refresh);
+void check_refresh(uint8_t refresh);
 
 // Handige functies die we overal gebruiken
-const char* get_type(uint8_t par_id);
 csp_iface_t init_udp();
 
 // Server communication
-void sendToServer(uint8_t * data, int length, int amountOfIds);
-void returnedFromServer(csp_packet_t * packet, int amountOfIds);
+void send_to_server(uint8_t * data, int length, int amountOfIds);
+void returned_from_server(csp_packet_t * packet, int amountOfIds);
 
 #endif // _GSENSEAPI_H_

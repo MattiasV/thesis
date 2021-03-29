@@ -8,8 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
-
-#include "config.h"
+#include "GSenseAPI.h"
 
 //json object list sizes
 #define JSON_MAX_SIZE 1024
@@ -25,15 +24,18 @@
 #define VALUE_INDEX 4
 #define UPDATED_INDEX 5
 
+#define JSON_FLAG JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY
+
 //global variables
 struct json_object * parsed_json;
 
-void store_list(uint8_t * data);
-uint8_t * get_data_in_parameterlist(parameter_t * parameter, uint8_t * data, int length, int * index_of_data);
-int get_values_from_json(struct json_object * json_object_list[JSON_OBJ_LIST_SIZE]);
+void store_list_from_bytes(uint8_t * data, int length);
+void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index_of_data);
 void add_values(uint8_t * data, int length);
+void set_value_in_jobject(json_object * jparameter, uint8_t * data, int * index_of_data);
 void set_updated(int amountOfIds);
 void print_list();
+json_object * get_json_from_file();
 int get_type(uint8_t par_id);
 
 #endif // _JSONFUNCTIONS_H_

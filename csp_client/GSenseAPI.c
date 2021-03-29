@@ -1,9 +1,5 @@
 #include "GSenseAPI.h"
-#include "jsonFunctions.h"
 
-#include <csp/csp.h>
-#include <csp/arch/csp_thread.h>
-#include <csp/interfaces/csp_if_udp.h>
 
 // Size van de te zenden berichten
 // 1 byte msg ID , 1 byte PAR_ID, (1-4) bytes value
@@ -24,7 +20,7 @@ void download_list()
 	data[0] = DOWNLOAD_ID;
 	length = sizeof(data);
 
-	sendToServer(data, length, 0);
+	send_to_server(data, length, 0);
 
 }
 
@@ -35,10 +31,10 @@ int load_list()
 	int length;
 	data[0] = REFRESH_ID;
 	length = sizeof(data);
-	sendToServer(data, length, 0);
+	send_to_server(data, length, 0);
 }
 
-void checkRefresh(uint8_t refresh){
+void check_refresh(uint8_t refresh){
 
 	if(refresh == 1){
 		printf("We moeten gaan refreshen\n");
@@ -48,7 +44,7 @@ void checkRefresh(uint8_t refresh){
 	}
 }
 
-void sendToServer(uint8_t * data, int length, int amountOfIds){
+void send_to_server(uint8_t * data, int length, int amountOfIds){
 
 	csp_iface_t iface;
 	csp_packet_t * packet;
@@ -77,11 +73,11 @@ void sendToServer(uint8_t * data, int length, int amountOfIds){
 		rxpacket = input.packet;
 		break;
 	}
-	returnedFromServer(rxpacket, amountOfIds);
+	returned_from_server(rxpacket, amountOfIds);
 
 }
 
-void returnedFromServer(csp_packet_t * packet, int amountOfIds){
+void returned_from_server(csp_packet_t * packet, int amountOfIds){
 
 	uint8_t identifier = packet->data[0];
 	printf("identifier: %d\n", identifier);
@@ -92,16 +88,16 @@ void returnedFromServer(csp_packet_t * packet, int amountOfIds){
 
 	switch(identifier){
 		case SET_ID:
-			setUpdated(amountOfIds);
+			set_updated(amountOfIds);
 			break;
 		case GET_ID:
-			addValues(data, sizeof(data));
+			add_values(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
-			store_list(data, packet->length -1);
+			store_list_from_bytes(data, packet->length -1);
 			break;
 		case REFRESH_ID:
-			checkRefresh(data[0]);
+			check_refresh(data[0]);
 			break;
 	}
 }

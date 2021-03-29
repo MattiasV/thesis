@@ -6,7 +6,6 @@
 #include <arpa/inet.h>
 
 #include "GSenseAPI.h"
-#include "jsonFunctions.h"
 
 int main(int argc, char* argv[])
 {

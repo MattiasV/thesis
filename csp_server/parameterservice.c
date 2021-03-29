@@ -107,7 +107,6 @@ void send_refresh()
 void send_parameter_list()
 {
 	convert_parameter_list();
-
 }
 
 void set_parameter(uint8_t * data, int length)
