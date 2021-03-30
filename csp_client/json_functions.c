@@ -12,20 +12,15 @@ void store_list_from_bytes(uint8_t * data, int length)
 
 	jobj = json_object_new_object();
 	jobjarray = json_object_new_array();
-
-	for(int i = 0; i < length;){
+	for(int i = 0; i < length-1;){
 		jparameter = json_object_new_object();
 		int index = i;
 		index = get_byte_data_in_json(jparameter, data, i);
 		i = index;
 		json_object_array_add(jobjarray, jparameter);
-
 	}
 	json_object_object_add(jobj, "parameters", jobjarray);
-	json_object_to_file_ext("testjson.json", jobj, JSON_FLAG);
-	//printf("%s\n",json_object_to_json_string_ext(jobj, JSON_FLAG));
-
-	//json_object_put(jobj);
+	json_object_to_file_ext("parameters.json", jobj, JSON_FLAG);
 }
 
 int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of_data){
@@ -37,7 +32,8 @@ int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of
 		bzero(description, MAX_DESCRIPTION_SIZE);
 		int datatype;
 		int k = 1; //this is used for the last byte of the string
-		//printf("BBB\n");
+		int index = 0; //needed when adding a value
+		//printf("type: %d\n", json_parameter_list[i].parameter_type);
 		switch(json_parameter_list[i].parameter_type){
 
 			case none:
@@ -45,100 +41,112 @@ int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of
 				break;
 
 			case u8:
-				//printf("id: %d\n", data[index_of_data]);
+				printf("u8\n");
+				printf("%d\n", data[index_of_data]);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[index_of_data++]));
 				break;
 
 			case i8:
+				printf("i8\n");
+				printf("%d\n", data[index_of_data]);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[index_of_data++]));
 				break;
 
 			case u16:
+				printf("u16\n");
 				fourBytesUnion.u8bytes[0] = data[index_of_data++];
 				fourBytesUnion.u8bytes[1] = data[index_of_data++];
+				printf("%d\n", fourBytesUnion.u16bytes[0]);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.u16bytes[0]));
 				break;
 
 			case i16:
+				printf("i16\n");
 				fourBytesUnion.u8bytes[0] = data[index_of_data++];
 				fourBytesUnion.u8bytes[1] = data[index_of_data++];
+				printf("%d\n", fourBytesUnion.i16bytes[0]);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i16bytes[0]));
 				break;
 
 			case u32:
+				printf("u32\n");
 				for(int j = 0; j < 4; j++){
-					fourBytesUnion.u8bytes[i] = data[index_of_data++];
+					fourBytesUnion.u8bytes[j] = data[index_of_data++];
 				}
+				printf("%d\n", fourBytesUnion.u32bytes);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.u32bytes));
 				break;
 
 			case i32:
+				printf("i32\n");
 				for(int j = 0; j < 4; j++){
-					fourBytesUnion.i8bytes[i] = data[index_of_data++];
+					fourBytesUnion.i8bytes[j] = data[index_of_data++];
 				}
+				printf("%d\n", fourBytesUnion.i32bytes);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i32bytes));
 				break;
 
 			case f32:
+				printf("f32\n");
 				for(int j = 0; j < 4; j++){
-					fourBytesUnion.u8bytes[i] = data[index_of_data++];
+					fourBytesUnion.u8bytes[j] = data[index_of_data++];
 				}
+				printf("%f\n", fourBytesUnion.fbytes);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_double(fourBytesUnion.fbytes));
 				break;
 
 			case c:
+				printf("c\n");
 				charparameter[0] = data[index_of_data++];
+				printf("%s\n", charparameter);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_string(charparameter));
 				break;
 
 			case s:
-
+				printf("s\n");
 				for(int j = 0; data[index_of_data] != '\0'; j++){
-					//printf("j: %d\n", j);
 					description[j] = data[index_of_data++]; // fill parameter->description char
 					k++;
 				}
 				description[k] = data[index_of_data++];
+				printf("%s\n", description);
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_string(description));
 				break;
 
-			case unk32:
+			case dtype:
+				json_object_object_add(jparameter, json_parameter_list[i].parameter_key,json_object_new_int(0)); //initialize the value op 0
+				printf("dtype\n");
 				datatype = json_object_get_int(json_object_object_get(jparameter, "datatype"));
-				if(datatype == f32){
-					for(int j = 0; j < 4; j++){
-						fourBytesUnion.u8bytes[i] = data[index_of_data++];
-					}
-					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_double(fourBytesUnion.fbytes));
-				}else{
-					for(int j = 0;j  < 4; j++){
-						fourBytesUnion.i8bytes[i] = data[index_of_data++];
-					}
-					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i32bytes));
-				}
+				index = set_value_in_jobject(jparameter, data, index_of_data);
+				index_of_data = index;
 				break;
-				case b:
-					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_boolean(data[index_of_data++]));
-					break;
+
+			case b:
+				printf("b\n");
+				printf("%d\n", data[index_of_data]);
+				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_boolean(data[index_of_data++]));
 
 			default:
 				printf("default at line: %d\n", __LINE__);
 				break;
 		}
 	}
-	//printf("%s",json_object_to_json_string_ext(jparameter, JSON_FLAG));
 	return index_of_data;
 
 }
 
 void add_values(uint8_t * data, int length){
 
-	json_object * jobj = get_json_from_file();
-	int json_array_size = json_object_array_length(jobj);
+	struct json_object * jobj;
+	jobj = json_object_new_object();
+	json_object * jobj_array = get_json_from_file();
+	int json_array_size = json_object_array_length(jobj_array);
 
 	for(int i = 0; i < length;){
-		json_object * jparameter = json_object_array_get_idx(jobj, i);
 		for(int j = 0; j < json_array_size; j++){
-			if(data[i] == json_object_get_int(json_object_object_get(jparameter,"id"))) {
+			json_object * jparameter = json_object_array_get_idx(jobj_array, j);
+			int id = json_object_get_int(json_object_object_get(jparameter,"id"));
+			if(data[i] == id) {
 				i++;
 				int index = i;
 				index = set_value_in_jobject(jparameter, data, i);
@@ -146,90 +154,110 @@ void add_values(uint8_t * data, int length){
 			}
 		}
 	}
+	json_object_object_add(jobj, "parameters", jobj_array);
 	json_object_to_file_ext("parameters.json", jobj, JSON_FLAG);
-	json_object_put(jobj);
-
+	json_object_put(parsed_json);
 }
 
 int set_value_in_jobject(json_object * jparameter, uint8_t * data, int index_of_data){
 
+	printf("index_of_data: %d\n", index_of_data);
 	json_object * jdatatype = json_object_object_get(jparameter, "datatype");
 	json_object * jvalue = json_object_object_get(jparameter, "value");
 	int datatype = json_object_get_int(jdatatype);
+	printf("datatype: %d\n", datatype);
 	switch(datatype){
+
 		case u8:
+			printf("u8\n");
 			json_object_set_int(jvalue,data[index_of_data++]);
 			break;
+
 		case i8:
+			printf("i8\n");
 			json_object_set_int(jvalue,data[index_of_data++]);
 			break;
+
 		case u16:
+			printf("u16\n");
 			fourBytesUnion.u8bytes[0] = data[index_of_data++];
 			fourBytesUnion.u8bytes[1] = data[index_of_data++];
 			json_object_set_int(jvalue,fourBytesUnion.u16bytes[0]);
 			break;
+
 		case i16:
+			printf("i16\n");
 			fourBytesUnion.i8bytes[0] = data[index_of_data++];
 			fourBytesUnion.i8bytes[1] = data[index_of_data++];
 				json_object_set_int(jvalue,fourBytesUnion.i16bytes[0]);
 			break;
+
 		case u32:
+			printf("u32\n");
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[index_of_data++];
 			}
 				json_object_set_int(jvalue,fourBytesUnion.u32bytes);
+			break;
+
 		case i32:
-		for(int i = 0; i < 4; i++){
-			fourBytesUnion.i8bytes[i] = data[index_of_data++];
-		}
+			for(int i = 0; i < 4; i++){
+				fourBytesUnion.i8bytes[i] = data[index_of_data++];
+			}
 			json_object_set_int(jvalue,fourBytesUnion.i32bytes);
+			break;
+
 		case f32:
-		for(int i = 0; i < 4; i++){
-			fourBytesUnion.u8bytes[i] = data[index_of_data++];
-		}
-			json_object_set_double(jvalue,fourBytesUnion.fbytes);
+			for(int i = 0; i < 4; i++){
+				fourBytesUnion.u8bytes[i] = data[index_of_data++];
+			}
+			printf("fbytes: %f\n", fourBytesUnion.fbytes);
+			json_object_set_int(jvalue,fourBytesUnion.fbytes);
+			break;
 	}
 	return index_of_data;
 }
 
 void set_updated(int amountOfIds){
-
-	json_object * jobj = get_json_from_file();
-	int size = json_object_array_length(jobj);
+	struct json_object * jobj;
+	jobj = json_object_new_object();
+	struct json_object * jobj_array = get_json_from_file();
+	int size = json_object_array_length(jobj_array);
 
 	for(int i = 0; i < size; i++){
-		json_object * jparameter = json_object_array_get_idx(jobj, i);
+		json_object * jparameter = json_object_array_get_idx(jobj_array, i);
 		for(int j = 0; j < amountOfIds; j++){
-			if(idArray[j] == json_object_get_int(json_object_object_get(jparameter,"id"))) {
-				json_object_set_int(json_object_object_get(jparameter,"updated"), 1);
+			int id = json_object_get_int(json_object_object_get(jparameter,"id"));
+			if(idArray[j] == id) {
+				printf("id: %d\n", id);
+				json_object_set_boolean(json_object_object_get(jparameter,"updated"),true);
 			}
 		}
 	}
 
+	json_object_object_add(jobj, "parameters", jobj_array);
 	json_object_to_file_ext("parameters.json", jobj, JSON_FLAG);
-	json_object_put(jobj);
+	json_object_put(parsed_json);
 }
 
 void print_list()
 {
-
-	struct json_object * jobj; // list of pointers pointing to a json_object struct, each json_object struct is a sub of the big json_object struct which represents the .json file
-	jobj = get_json_from_file(); //getting the amount of different id's
+	struct json_object * jobj;
+	jobj = json_object_new_object();
+	struct json_object * jobj_array = get_json_from_file(); //getting the amount of different id's
+	json_object_object_add(jobj, "parameters", jobj_array);
 	printf("%s", json_object_to_json_string_ext(jobj, JSON_FLAG));
-	//json_object_put(jobj);
+	json_object_put(parsed_json);
 
 }
 
-json_object * get_json_from_file(){ // open json file, read all the json_objects and put them in the json_object pointer lists
-
+struct json_object * get_json_from_file(){ // open json file, read all the json_objects and put them in the json_object pointer lists
 	char buffer[JSON_MAX_SIZE];
 	int array_size;
 	int succes;
 	struct json_object *parameter_array;
-	struct json_object *parameter;
 
 	FILE *fptr;
-
 	// File openen en naar buffer
 	fptr = fopen("parameters.json" , "r");
 	fread(buffer,JSON_MAX_SIZE,1,fptr);
@@ -243,7 +271,6 @@ json_object * get_json_from_file(){ // open json file, read all the json_objects
 		printf("Failed to open json file with array tag \"parameters\". \n");
 		return NULL;
 	}
-	printf("test\n");
 	return parameter_array;
 }
 
@@ -255,24 +282,22 @@ geupdate is, als deze geupdate is (receiving 1 terug) dan gaan we de parameterli
 int get_type(uint8_t par_id)
 {
 
-
 	int type = 0;
 	int found = 0;
 
 	json_object * jobj = get_json_from_file();
 	int size = json_object_array_length(jobj);
-	json_object * jobjparameters = json_object_object_get(jobj, "parameters");
 	for(int i = 0; i < size; i++){
-		json_object * jparameter = json_object_array_get_idx(jobjparameters,i);
+		json_object * jparameter = json_object_array_get_idx(jobj,i);
 		int search_id;
 		search_id = json_object_get_int(json_object_object_get(jparameter,"id"));
-		printf("searchid: %d\n", search_id);
 		if(par_id == search_id)
 		{
-			printf("found\n");
-			type = json_object_get_int(json_object_object_get(jobj, "datatype"));
+			printf("search_id: %d\n", search_id);
+			type = json_object_get_int(json_object_object_get(jparameter, "datatype"));
+			printf("type: %d\n", type);
 		}
 	}
-	json_object_put(jobj);
+	json_object_put(parsed_json);
 	return type;
 }

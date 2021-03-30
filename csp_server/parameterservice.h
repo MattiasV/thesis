@@ -59,6 +59,7 @@ void convert_parameter_list(uint8_t list_in_bytes[]);
 void listen_in();
 void send_refresh();
 void send_parameter_list();
+int check_datatype_and_put_in_byte_array(uint8_t * list_in_bytes, int datatype, int list_in_bytes_index, int parameterlist_index);
 void set_parameter(uint8_t * msg, int length);
 void get_parameter(uint8_t * data, int length);
 void check_type_and_set_register(int * index, uint8_t * data, int type, int offset);

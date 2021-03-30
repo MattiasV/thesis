@@ -20,7 +20,7 @@ void add_values(uint8_t * data, int length);
 int set_value_in_jobject(json_object * jparameter, uint8_t * data, int index_of_data);
 void set_updated(int amountOfIds);
 void print_list();
-json_object * get_json_from_file();
+struct json_object * get_json_from_file();
 int get_type(uint8_t par_id);
 
 #endif // _JSON_FUNCTIONS_H_

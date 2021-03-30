@@ -22,11 +22,11 @@ typedef struct {
 } parameter_t;
 
 const parameter_t parameterlist[] = {
-		{0,"VersionNr", u8	, VERSION_NR,0,0},
-		{1,"FirmwareD", u8	,0,0,0},
-		{2,"LedCtrl", u8	,	LED_CTRL,0,0},
-		{3,"CamCont"	,u32	,	CAM_CTRL,0,0},
-		{4,"FloatTest"	,f32	,	FLOAT_TEST,0,0}
+		{0,"VersionNr", u8, VERSION_NR, 20, 0},
+		{1,"FirmwareD", u8, 0, 0, 0},
+		{2,"LedCtrl", u8,	LED_CTRL, 0, 0},
+		{3,"CamCont", u32,	CAM_CTRL, 0, 0},
+		{4,"Test", i32,	TEST, 0, 0}
 };
 
 #endif

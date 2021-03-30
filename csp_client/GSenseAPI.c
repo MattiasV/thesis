@@ -52,7 +52,6 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	iface = init_udp(200);
 	csp_buffer_init(10,200);
 	packet = csp_buffer_get(200);
-	printf("data[0]: %d\n", data[0]);
 
 	for(int i = 0; i < length; i++){
 		packet->data[i] = data[i];
@@ -83,7 +82,6 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 void returned_from_server(csp_packet_t * packet, int amountOfIds){
 
 	uint8_t identifier = packet->data[0];
-	printf("identifier: %d\n", identifier);
 	uint8_t data[packet->length - 1];
 	for(int i = 1; i < packet->length; i++){
 		data[i-1] = packet->data[i];
@@ -108,7 +106,7 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 
 csp_iface_t init_udp(int bytes)
 {
-	if(csp_buffer_init(10, 100)<0)
+	if(csp_buffer_init(10, 200)<0)
 	printf("could not initialize buffer\n");
 
 	csp_conf_t csp_conf;

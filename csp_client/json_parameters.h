@@ -6,7 +6,7 @@
 //keep this synchronized with the server!!!
 
 //if you add another datatype, add this to the get_byte_data_in_json case as well with the correct logic
-enum datatypes {none=0,u8=1,i8=2,u16=3,i16=4,u32=5,i32=6,f32=7,c=8,s=9,unk32=10,b=11};
+enum datatypes {none=0,u8=1,i8=2,u16=3,i16=4,u32=5,i32=6,f32=7,c=8,s=9,dtype=10,b=11};
 
 struct {
   char * parameter_key;
@@ -16,7 +16,7 @@ struct {
   {"description", s},
   {"datatype", u8},
   {"offset", u32},
-  {"value", unk32},
+  {"value", dtype},
   {"updated", b}
 };
 

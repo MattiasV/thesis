@@ -16,7 +16,7 @@ typedef enum{
 	VERSION_NR = 0,
 	LED_CTRL = 256,
 	CAM_CTRL = 512,
-	FLOAT_TEST = 400,
+	TEST = 400,
 }uio_register_t;
 
 #define MMAP_ERROR 0

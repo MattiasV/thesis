@@ -32,11 +32,10 @@ int main(int argc, char* argv[])
 
 	bytesToSend[0] = SET_ID;
 	int byteindex = 1; //start at index 1 because SET_ID is on 0
-	for(int i = 1; i < size; i += 2){
+	for(int i = 0; i < size; i += 2){
 
 		uint8_t id = atoi(argv[i]);
 		int type = get_type(id);
-		//printf("parameterId: %d, type: %s\n",parameterId, type);
 
 		if(type == 0)
 		{
@@ -53,6 +52,7 @@ int main(int argc, char* argv[])
 			length++;
 			bytesToSend[byteindex++] = value;
 			length++;
+
 		}
 
 		else if(type > 2 && type <= 4)

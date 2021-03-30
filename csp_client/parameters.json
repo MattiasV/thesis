@@ -1,38 +1,44 @@
 {
-"parameters": [{
-	 	 "id":"0",
-	 	 "description":"VersionNr",
-	 	 "type":"uint8_t",
-	 	 "size":"1",
-	 	 "value":"0",
-	 	 "updated":"0"
-	 }, {
-	 	 "id":"1",
-	 	 "description":"FirmwareD",
-	 	 "type":"uint8_t",
-	 	 "size":"1",
-	 	 "value":"0",
-	 	 "updated":"0"
-	 }, {
-	 	 "id":"2",
-	 	 "description":"LedCtrl",
-	 	 "type":"uint8_t",
-	 	 "size":"1",
-	 	 "value":"0",
-	 	 "updated":"1"
-	 }, {
-	 	 "id":"3",
-	 	 "description":"CamCont",
-	 	 "type":"uint32_t",
-	 	 "size":"4",
-	 	 "value":"0",
-	 	 "updated":"0"
-	 }, {
-	 	 "id":"4",
-	 	 "description":"FloatTest",
-	 	 "type":"float",
-	 	 "size":"4",
-	 	 "value":"0",
-	 	 "updated":"0"
-}]
-}
+   "parameters": [
+     {
+       "id": 0,
+       "description": "VersionNr",
+       "datatype": 1,
+       "offset": 0,
+       "value": 20,
+       "updated": false
+     },
+     {
+       "id": 1,
+       "description": "FirmwareD",
+       "datatype": 1,
+       "offset": 0,
+       "value": 0,
+       "updated": false
+     },
+     {
+       "id": 2,
+       "description": "LedCtrl",
+       "datatype": 1,
+       "offset": 256,
+       "value": 0,
+       "updated": false
+     },
+     {
+       "id": 3,
+       "description": "CamCont",
+       "datatype": 5,
+       "offset": 512,
+       "value": 0,
+       "updated": false
+     },
+     {
+       "id": 4,
+       "description": "Test",
+       "datatype": 6,
+       "offset": 400,
+       "value": 0,
+       "updated": false
+     }
+   ]
+ }
