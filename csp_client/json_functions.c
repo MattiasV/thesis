@@ -21,7 +21,7 @@ void store_list_from_bytes(uint8_t * data, int length)
 		json_object_array_add(jobjarray, jparameter);
 
 	}
-	json_object_object_add(jobj, "parameter", jobjarray);
+	json_object_object_add(jobj, "parameters", jobjarray);
 	json_object_to_file_ext("testjson.json", jobj, JSON_FLAG);
 	printf("%s\n",json_object_to_json_string_ext(jobj, JSON_FLAG));
 
