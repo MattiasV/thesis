@@ -73,7 +73,7 @@ CSP_DEFINE_TASK(csp_if_udp_rx_task) {
 				continue;
 			}
 
-			//printf("UDP peer address: %s\n", inet_ntoa(peer_addr.sin_addr));
+			printf("UDP peer address: %s\n", inet_ntoa(peer_addr.sin_addr));
 
 			/* Maak een packet klaar om alle data in te zetten */
 			csp_packet_t * packet = csp_buffer_get(iface->mtu);

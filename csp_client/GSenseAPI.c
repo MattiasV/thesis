@@ -49,9 +49,11 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	csp_iface_t iface;
 	csp_packet_t * packet;
 
-	iface = init_udp(MAX_SET_BYTES);
-	packet = csp_buffer_get(MAX_SET_BYTES);
+	iface = init_udp(200);
+	csp_buffer_init(10,200);
+	packet = csp_buffer_get(200);
 	printf("data[0]: %d\n", data[0]);
+
 	for(int i = 0; i < length; i++){
 		packet->data[i] = data[i];
 		printf("bytesToSend[%d]: %d\n", i, data[i]);
@@ -64,7 +66,9 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	//csp_if_udp_tx(&iface, packet, 1000);
 
 	/* receiving packet */
+	csp_buffer_init(10,200);
 	csp_packet_t * rxpacket;
+	rxpacket = csp_buffer_get(200);
 	while(1){
 		csp_qfifo_t input;
 		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {
@@ -74,7 +78,6 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 		break;
 	}
 	returned_from_server(rxpacket, amountOfIds);
-
 }
 
 void returned_from_server(csp_packet_t * packet, int amountOfIds){
@@ -105,7 +108,7 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 
 csp_iface_t init_udp(int bytes)
 {
-	if(csp_buffer_init(1, bytes)<0)
+	if(csp_buffer_init(10, 100)<0)
 	printf("could not initialize buffer\n");
 
 	csp_conf_t csp_conf;
@@ -116,7 +119,7 @@ csp_iface_t init_udp(int bytes)
 
 	static csp_iface_t iface;
 	csp_if_udp_init(&iface, IP );
-	csp_route_set(CSP_DEFAULT_ROUTE, &iface, CSP_NODE_MAC);
+	csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
 
   return iface;
 }

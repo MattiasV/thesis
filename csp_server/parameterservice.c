@@ -19,20 +19,27 @@ int main(int argc, char* argv[])
 	csp_if_udp_init(&iface, IP );
   csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
 
-  while(1) {
+	csp_buffer_init(1,1);
+	csp_packet_t * packet;
+	packet = csp_buffer_get(1);
+	packet->data[0] = 1;
+	packet->length = 1;
+	listen_in(packet->data, packet->length);
 
-		csp_buffer_init(1,80);
-    csp_qfifo_t input;
-    if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
-			continue;
-		}
-    csp_packet_t * packet;
-		packet = input.packet;
-		listen_in(packet->data, packet->length);
-
-		printf("buffer size remaining: %d\n", csp_buffer_remaining());
-
-	}
+  // while(1) {
+	//
+	// 	csp_buffer_init(1,80);
+  //   csp_qfifo_t input;
+  //   if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
+	// 		continue;
+	// 	}
+  //   csp_packet_t * packet;
+	// 	packet = input.packet;
+	// 	listen_in(packet->data, packet->length);
+	//
+	// 	printf("buffer size remaining: %d\n", csp_buffer_remaining());
+	//
+	// }
 }
 
 
@@ -103,18 +110,18 @@ void send_refresh()
 void send_parameter_list()
 {
 	uint8_t list_in_bytes[sizeof(parameterlist)];
+	bzero(list_in_bytes, sizeof(parameterlist));
 	int list_in_bytes_index = 0;
 	for(int i = 0; i <sizeof(parameterlist)/sizeof(parameter_t);i++){
-		printf("i: %d\n", i);
+
 		//set ID in bytes
 		list_in_bytes[list_in_bytes_index++] = parameterlist[i].id;
 
 		//set description in bytes
-		uint8_t descr[sizeof(parameterlist[i].description)];
-		sprintf(descr, "%s", parameterlist[i].description);
-		for(int j = 0; j < sizeof(descr);j++){
-			list_in_bytes[list_in_bytes_index++] = descr[j];
+		for(int j = 0; parameterlist[i].description[j] != '\0' ;j++){
+			list_in_bytes[list_in_bytes_index++] = parameterlist[i].description[j];
 		}
+		list_in_bytes[list_in_bytes_index++] = '\0';
 
 		//set datatype in bytes
 		list_in_bytes[list_in_bytes_index++] = parameterlist[i].datatype;
@@ -147,7 +154,10 @@ void send_parameter_list()
 	packet = csp_buffer_get(sizeof(parameterlist));
 	for(int i = 0; i < sizeof(parameterlist); i ++){
 		packet->data[i] = list_in_bytes[i];
+		// printf("list_in_bytes[%d]: %d\n", i, list_in_bytes[i]);
 	}
+	packet->length = sizeof(parameterlist);
+	csp_if_udp_tx(&iface, packet, TIMEOUT);
 }
 
 
@@ -221,7 +231,6 @@ void check_type_and_set_register(int * index, uint8_t * data, int type, int offs
 		case f32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[*index];
-				printf("index: %d\n", *index);
 				*index++;
 			}
 			setRegister_float(offset, fourBytesUnion.fbytes);

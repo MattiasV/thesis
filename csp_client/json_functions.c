@@ -215,7 +215,7 @@ json_object * get_json_from_file(){ // open json file, read all the json_objects
 	fptr = fopen("parameters.json" , "r");
 	fread(buffer,JSON_MAX_SIZE,1,fptr);
 	fclose(fptr);
-
+	printf("buffer[0]: %c\n", buffer[0]);
 	// De json gaat een array van structs zijn
 	parsed_json = json_tokener_parse(buffer);
 	succes = json_object_object_get_ex(parsed_json, "parameters" , &parameter_array);
@@ -232,7 +232,6 @@ json_object * get_json_from_file(){ // open json file, read all the json_objects
 Hier gaan we een datapakket [0] sturen, die simpelweg aan starterkit vraagt of de parameterlijst
 geupdate is, als deze geupdate is (receiving 1 terug) dan gaan we de parameterlijst downloaden
 */
-
 
 int get_type(uint8_t par_id)
 {
