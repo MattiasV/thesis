@@ -12,23 +12,32 @@ void store_list_from_bytes(uint8_t * data, int length)
 
 	jobj = json_object_new_object();
 	jobjarray = json_object_new_array();
-	jparameter = json_object_new_object();
+
 	for(int i = 0; i < length;){
-		get_byte_data_in_json(jparameter, data, &i);
+		jparameter = json_object_new_object();
+		int index = i;
+		index = get_byte_data_in_json(jparameter, data, i);
+		i = index;
 		json_object_array_add(jobjarray, jparameter);
+
 	}
 	json_object_object_add(jobj, "parameter", jobjarray);
 	json_object_to_file_ext("testjson.json", jobj, JSON_FLAG);
-	json_object_put(jobj);
+	printf("%s\n",json_object_to_json_string_ext(jobj, JSON_FLAG));
+
+	//json_object_put(jobj);
 }
 
-void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index_of_data){
+int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of_data){
 
 	for(int i = 0; i < sizeof(json_parameter_list)/(sizeof(char *)*2); i++){
+		//printf("i: %d\n", i);
 		char description[MAX_DESCRIPTION_SIZE];
 		char charparameter[1];
 		bzero(description, MAX_DESCRIPTION_SIZE);
 		int datatype;
+		int k = 1; //this is used for the last byte of the string
+		//printf("BBB\n");
 		switch(json_parameter_list[i].parameter_type){
 
 			case none:
@@ -36,74 +45,79 @@ void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index
 				break;
 
 			case u8:
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[*index_of_data++]));
+				//printf("id: %d\n", data[index_of_data]);
+				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[index_of_data++]));
 				break;
 
 			case i8:
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[*index_of_data++]));
+				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[index_of_data++]));
 				break;
 
 			case u16:
-				fourBytesUnion.u8bytes[0] = data[*index_of_data++];
-				fourBytesUnion.u8bytes[1] = data[*index_of_data++];
+				fourBytesUnion.u8bytes[0] = data[index_of_data++];
+				fourBytesUnion.u8bytes[1] = data[index_of_data++];
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.u16bytes[0]));
 				break;
 
 			case i16:
-				fourBytesUnion.u8bytes[0] = data[*index_of_data++];
-				fourBytesUnion.u8bytes[1] = data[*index_of_data++];
+				fourBytesUnion.u8bytes[0] = data[index_of_data++];
+				fourBytesUnion.u8bytes[1] = data[index_of_data++];
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i16bytes[0]));
 				break;
 
 			case u32:
-				for(int i = 0; i < 4; i++){
-					fourBytesUnion.u8bytes[i] = data[*index_of_data++];
+				for(int j = 0; j < 4; j++){
+					fourBytesUnion.u8bytes[i] = data[index_of_data++];
 				}
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.u32bytes));
 				break;
 
 			case i32:
-				for(int i = 0; i < 4; i++){
-					fourBytesUnion.i8bytes[i] = data[*index_of_data++];
+				for(int j = 0; j < 4; j++){
+					fourBytesUnion.i8bytes[i] = data[index_of_data++];
 				}
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i32bytes));
 				break;
 
 			case f32:
-				for(int i = 0; i < 4; i++){
-					fourBytesUnion.u8bytes[i] = data[*index_of_data++];
+				for(int j = 0; j < 4; j++){
+					fourBytesUnion.u8bytes[i] = data[index_of_data++];
 				}
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_double(fourBytesUnion.fbytes));
 				break;
 
 			case c:
-				charparameter[0] = data[*index_of_data++];
+				charparameter[0] = data[index_of_data++];
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_string(charparameter));
 				break;
 
 			case s:
-				for(int i = 0; data[*index_of_data] != '\0'; i++){
-					description[i] = data[*index_of_data++]; // fill parameter->description char
+
+				for(int j = 0; data[index_of_data] != '\0'; j++){
+					//printf("j: %d\n", j);
+					description[j] = data[index_of_data++]; // fill parameter->description char
+					k++;
 				}
+				description[k] = data[index_of_data++];
 				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_string(description));
 				break;
 
 			case unk32:
 				datatype = json_object_get_int(json_object_object_get(jparameter, "datatype"));
 				if(datatype == f32){
-					for(int i = 0; i < 4; i++){
-						fourBytesUnion.u8bytes[i] = data[*index_of_data++];
+					for(int j = 0; j < 4; j++){
+						fourBytesUnion.u8bytes[i] = data[index_of_data++];
 					}
 					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_double(fourBytesUnion.fbytes));
 				}else{
-					for(int i = 0; i < 4; i++){
-						fourBytesUnion.i8bytes[i] = data[*index_of_data++];
+					for(int j = 0;j  < 4; j++){
+						fourBytesUnion.i8bytes[i] = data[index_of_data++];
 					}
 					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i32bytes));
 				}
 				break;
 				case b:
-					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_boolean(data[*index_of_data++]));
+					json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_boolean(data[index_of_data++]));
 					break;
 
 			default:
@@ -111,6 +125,8 @@ void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index
 				break;
 		}
 	}
+	//printf("%s",json_object_to_json_string_ext(jparameter, JSON_FLAG));
+	return index_of_data;
 
 }
 

@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
 
 	download_list();
 
-	print_list();
-	
+	//print_list();
+
 	free(bytesToSend);
 	return 0;
 }

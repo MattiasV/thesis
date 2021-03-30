@@ -15,7 +15,7 @@
 struct json_object * parsed_json;
 
 void store_list_from_bytes(uint8_t * data, int length);
-void get_byte_data_in_json(json_object * jparameter, uint8_t * data, int * index_of_data);
+int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of_data);
 void add_values(uint8_t * data, int length);
 void set_value_in_jobject(json_object * jparameter, uint8_t * data, int * index_of_data);
 void set_updated(int amountOfIds);

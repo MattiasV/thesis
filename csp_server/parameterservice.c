@@ -109,9 +109,12 @@ void send_refresh()
 // Send parameter list to client
 void send_parameter_list()
 {
+
+
 	uint8_t list_in_bytes[sizeof(parameterlist)];
 	bzero(list_in_bytes, sizeof(parameterlist));
-	int list_in_bytes_index = 0;
+	list_in_bytes[0] = DOWNLOAD_ID;
+	int list_in_bytes_index = 1;
 	for(int i = 0; i <sizeof(parameterlist)/sizeof(parameter_t);i++){
 
 		//set ID in bytes
@@ -149,12 +152,11 @@ void send_parameter_list()
 		list_in_bytes[list_in_bytes_index++] = parameterlist[i].updated;
 	}
 
-	csp_buffer_init(1,sizeof(parameterlist));
+	csp_buffer_init(1,sizeof(parameterlist)+1);
 	csp_packet_t * packet;
-	packet = csp_buffer_get(sizeof(parameterlist));
-	for(int i = 0; i < sizeof(parameterlist); i ++){
+	packet = csp_buffer_get(sizeof(parameterlist) + 1);
+	for(int i = 0; i < (sizeof(parameterlist) + 1); i ++){
 		packet->data[i] = list_in_bytes[i];
-		// printf("list_in_bytes[%d]: %d\n", i, list_in_bytes[i]);
 	}
 	packet->length = sizeof(parameterlist);
 	csp_if_udp_tx(&iface, packet, TIMEOUT);
