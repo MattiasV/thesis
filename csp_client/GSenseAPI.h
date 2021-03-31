@@ -46,6 +46,10 @@
 #define VALUE_INDEX 4
 #define UPDATED_INDEX 5
 
+#define SET_MSG_8 3
+#define SET_MSG_32 6
+#define SET_MSG_FL 6
+
 #define MAX_INDEX_SIZE 1
 
 // Global variables

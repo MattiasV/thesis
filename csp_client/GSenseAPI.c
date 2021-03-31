@@ -2,16 +2,6 @@
 #include "json_functions.h"
 #include "config.h"
 
-// Size van de te zenden berichten
-// 1 byte msg ID , 1 byte PAR_ID, (1-4) bytes value
-#define SET_MSG_8 3
-#define SET_MSG_32 6
-#define SET_MSG_FL 6
-
-/**
-	download_list is the function that first asks the parameter list to the starterkit
-	after receiving the paramater list it calls store_list to save it in JSON file
-*/
 
 void download_list()
 {
@@ -24,6 +14,7 @@ void download_list()
 
 }
 
+
 int load_list()
 {
 
@@ -34,6 +25,7 @@ int load_list()
 	send_to_server(data, length, 0);
 }
 
+
 void check_refresh(uint8_t refresh){
 
 	if(refresh == 1){
@@ -43,6 +35,7 @@ void check_refresh(uint8_t refresh){
 		printf("We moeten niet gaan refreshen \n");
 	}
 }
+
 
 void send_to_server(uint8_t * data, int length, int amountOfIds){
 
@@ -55,10 +48,8 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 
 	for(int i = 0; i < length; i++){
 		packet->data[i] = data[i];
-		printf("bytesToSend[%d]: %d\n", i, data[i]);
 	}
 	packet->length = length;
-	printf("packet length: %d\n", length);
 	//wait for rx thread to be at the reading line
 	csp_sleep_ms(10);
 
@@ -77,6 +68,7 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	returned_from_server(rxpacket, amountOfIds);
 }
 
+
 void returned_from_server(csp_packet_t * packet, int amountOfIds){
 
 	uint8_t identifier = packet->data[0];
@@ -93,7 +85,6 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 			add_values(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
-			printf("downloading\n");
 			store_list_from_bytes(data, packet->length -1);
 			break;
 		case REFRESH_ID:
@@ -102,16 +93,17 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 	}
 }
 
+
 csp_iface_t init_udp(int bytes)
 {
 	if(csp_buffer_init(1, bytes)<0)
-	printf("could not initialize buffer\n");
+		printf("could not initialize buffer\n");
 
 	csp_conf_t csp_conf;
 	csp_conf_get_defaults(&csp_conf);
 	csp_conf.address = MY_ADDRESS;
 	if(csp_init(&csp_conf) < 0)
-	printf("could not initialize csp\n");
+		printf("could not initialize csp\n");
 
 	static csp_iface_t iface;
 	csp_if_udp_init(&iface, IP );
