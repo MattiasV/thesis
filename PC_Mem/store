@@ -1,0 +1,25 @@
+Starterkit
+Weer een case switch gaan implementeren dat op basis van ID verschillende functies gaat implementeren.
+
+Ik zou ook weer gaan voor MemoryGSenseHal.h waar we de base adressen bijhouden van DDR, flash en fpga. En dan in MemoryGSenseHal.c zou ik gaan voor dingen zoals.
+
+DDR gaan lezen schrijven
+
+write_ddr(int offset, int size, int [] data)
+* rfile read_ddr (int offset, int size)
+
+Hierbij gaan we waarschijnlijk een uio driver moeten regelen puur voor DDR. Hierop moeten we nog wachten tot Jan dit heeft ingesteld en een memory space heeft gereserveerd voor in het DDR.
+
+FPGA gaan lezen schrijven
+
+write_fpga(int offset, int size, int [] data)
+* rfile read_fpga (int offset, int size)$
+
+Hierbij hebben we reeds een uio driver voor de fpga. Dit is hetzelfde als bij het parametersysteem. Dit is het eerste wat we waarschijnlijk met succes gaan kunnen testen.
+
+Flash gaan lezen schrijven
+
+write_flash (int offset, int size, int [] data)
+* rfile read_flash (int offset, int size)
+
+Dit gaan we tijdens onze thesis nog niet kunnen testen. Hiervoor moest nog een aparte flash controller worden gem
