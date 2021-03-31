@@ -31,6 +31,8 @@ int refresh;
 #define SIZE_ID 4
 
 #define MAX_DESCRIPTION_SIZE 50
+#define MAX_INDEX_SIZE 1
+#define MAX_SET_BYTES_REQUEST (1 + MAX_INDEX_SIZE + 4)*sizeof(parameterlist)/sizeof(parameter_t)
 
 union{
   uint8_t u8bytes[4];
@@ -62,6 +64,6 @@ void send_parameter_list();
 int check_datatype_and_put_in_byte_array(uint8_t * list_in_bytes, int datatype, int list_in_bytes_index, int parameterlist_index);
 void set_parameter(uint8_t * msg, int length);
 void get_parameter(uint8_t * data, int length);
-void check_type_and_set_register(int * index, uint8_t * data, int type, int offset);
+int check_type_and_set_register(int index, uint8_t * data, int type, int offset);
 int check_type_and_get_register(int datatype, int offset);
 #endif // _PARAMETERSERVICE_H_

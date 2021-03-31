@@ -10,7 +10,7 @@
 
 #include "GSenseHal.h"
 
-enum datatypes {none,u8,i8,u16,i16,u32,i32,f32,c,s,unk32,b};
+enum datatypes {none,u8,i8,u16,i16,u32,i32,f32,c,s,b};
 
 typedef struct {
   uint8_t id;

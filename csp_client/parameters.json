@@ -13,7 +13,7 @@
        "description": "FirmwareD",
        "datatype": 1,
        "offset": 0,
-       "value": 0,
+       "value": 2,
        "updated": false
      },
      {

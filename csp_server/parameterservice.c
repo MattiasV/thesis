@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
 
 	// SETTING UP UDP CSP SERVER AND LISTEN FOR INCOMMING MSG
 
-	if(csp_buffer_init(1, 80)<0)			// initialize 10 packets with 80 bytes each
+	if(csp_buffer_init(1, MAX_SET_BYTES_REQUEST)<0)			// initialize 10 packets with 80 bytes each
   return -1;
 
   csp_conf_t csp_conf;
@@ -19,27 +19,25 @@ int main(int argc, char* argv[])
 	csp_if_udp_init(&iface, IP );
   csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
 
-	csp_buffer_init(1,1);
-	csp_packet_t * packet;
-	packet = csp_buffer_get(1);
-	packet->data[0] = 1;
-	packet->length = 1;
-	listen_in(packet->data, packet->length);
+	// FOR TESTING
+	// csp_buffer_init(1,1);
+	// csp_packet_t * packet;
+	// packet = csp_buffer_get(1);
+	// packet->data[0] = 1;
+	// packet->length = 1;
+	// listen_in(packet->data, packet->length);
+while(1){
 
-  // while(1) {
-	//
-	// 	csp_buffer_init(1,80);
-  //   csp_qfifo_t input;
-  //   if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
-	// 		continue;
-	// 	}
-  //   csp_packet_t * packet;
-	// 	packet = input.packet;
-	// 	listen_in(packet->data, packet->length);
-	//
-	// 	printf("buffer size remaining: %d\n", csp_buffer_remaining());
-	//
-	// }
+		csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
+    csp_qfifo_t input;
+    if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
+			continue;
+		}
+    csp_packet_t * packet;
+		packet = input.packet;
+		listen_in(packet->data, packet->length);
+	}
+
 }
 
 
@@ -82,7 +80,7 @@ void listen_in(uint8_t * data, int length)
 			set_parameter(data, length);
 			break;
 		case GET_ID:
-			printf("We gaan een parameter opvragen \n");
+			printf("We gaan een parameter opvragen with length: %d\n", length);
 			get_parameter(data, length);
 			break;
 		case SIZE_ID:
@@ -161,7 +159,7 @@ void send_parameter_list()
 
 	}
 
-	csp_buffer_init(1,sizeof(parameterlist)+1);
+	csp_buffer_init(1,list_in_bytes_index+1);
 	csp_packet_t * packet;
 	packet = csp_buffer_get(sizeof(parameterlist) + 1);
 	for(int i = 0; i < list_in_bytes_index+1; i ++){
@@ -236,13 +234,12 @@ void set_parameter(uint8_t * data, int length)
 	// for loopje met de length van het packet
 	for(int i = 1; i < length;){
 
-		par_id = data[i];
-		printf("par_id: %d\n", par_id);
+		par_id = data[i++];
 		for(int j = 0; j < amount_of_paramters; j++){
 			if(parameterlist[j].id == par_id){
-				i++; //set the index on the first value byte of data[]
-				printf("j: %d\n",j);
-				check_type_and_set_register(&i, data, parameterlist[j].datatype, parameterlist[j].offset);
+				int index = i;
+				index = check_type_and_set_register(i, data, parameterlist[j].datatype, parameterlist[j].offset);
+				i = index;
 			}
 		}
 	}
@@ -257,52 +254,45 @@ void set_parameter(uint8_t * data, int length)
 
 }
 
-void check_type_and_set_register(int * index, uint8_t * data, int type, int offset){
+int check_type_and_set_register(int index, uint8_t * data, int type, int offset){
+
 	switch(type){
 		case u8:
-			setRegister_u8(offset, data[*index]);
-			*index++; //set index on next ID
+			setRegister_u8(offset, data[index++]);
 			break;
 		case i8:
-			setRegister_i8(offset, data[*index]);
-			*index++;
+			setRegister_i8(offset, data[index++]);
 			break;
 		case u16:
-			fourBytesUnion.u8bytes[0] = data[*index];
-			*index ++;
-			fourBytesUnion.u8bytes[1] = data[*index];
-			*index++;
+			fourBytesUnion.u8bytes[0] = data[index++];
+			fourBytesUnion.u8bytes[1] = data[index++];
 			setRegister_u16(offset, fourBytesUnion.u16bytes[0]);
 			break;
 		case i16:
-			fourBytesUnion.u8bytes[0] = data[*index];
-			*index ++;
-			fourBytesUnion.i8bytes[1] = data[*index];
-			*index++;
+			fourBytesUnion.u8bytes[0] = data[index++];
+			fourBytesUnion.i8bytes[1] = data[index++];
 			setRegister_i16(offset, fourBytesUnion.i16bytes[0]);
 			break;
 		case u32:
 			for(int i = 0; i < 4; i++){
-				fourBytesUnion.u8bytes[i] = data[*index];
-				*index++;
+				fourBytesUnion.u8bytes[i] = data[index++];
 			}
 			setRegister_u32(offset, fourBytesUnion.u32bytes);
 			break;
 		case i32:
 			for(int i = 0; i < 4; i++){
-				fourBytesUnion.i8bytes[i] = data[*index];
-				*index++;
+				fourBytesUnion.i8bytes[i] = data[index++];
 			}
 			setRegister_i32(offset, fourBytesUnion.i32bytes);
 			break;
 		case f32:
 			for(int i = 0; i < 4; i++){
-				fourBytesUnion.u8bytes[i] = data[*index];
-				*index++;
+				fourBytesUnion.u8bytes[i] = data[index++];
 			}
 			setRegister_float(offset, fourBytesUnion.fbytes);
 			break;
 	}
+	return index;
 }
 
 // Functie om de parameter te gaan lezen van de zynq
@@ -340,8 +330,7 @@ void get_parameter(uint8_t * data, int length)
 	for(int i = 0; i < index; i++){
 		printf("packet->data[%d]: %d\n", i, packet->data[i]);
 	}
-	csp_if_udp_tx(&iface, packet, TIMEOUT);
-
+	//csp_if_udp_tx(&iface, packet, TIMEOUT);
 }
 
 int check_type_and_get_register(int datatype, int offset){

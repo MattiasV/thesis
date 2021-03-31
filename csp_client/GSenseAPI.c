@@ -49,25 +49,23 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	csp_iface_t iface;
 	csp_packet_t * packet;
 
-	iface = init_udp(200);
-	csp_buffer_init(10,200);
-	packet = csp_buffer_get(200);
+	iface = init_udp(length);
+	csp_buffer_init(1,length);
+	packet = csp_buffer_get(length);
 
 	for(int i = 0; i < length; i++){
 		packet->data[i] = data[i];
 		printf("bytesToSend[%d]: %d\n", i, data[i]);
 	}
 	packet->length = length;
-
+	printf("packet length: %d\n", length);
 	//wait for rx thread to be at the reading line
 	csp_sleep_ms(10);
 
-	//csp_if_udp_tx(&iface, packet, 1000);
+	csp_if_udp_tx(&iface, packet, 1000);
 
 	/* receiving packet */
-	csp_buffer_init(10,200);
 	csp_packet_t * rxpacket;
-	rxpacket = csp_buffer_get(200);
 	while(1){
 		csp_qfifo_t input;
 		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {
@@ -106,7 +104,7 @@ void returned_from_server(csp_packet_t * packet, int amountOfIds){
 
 csp_iface_t init_udp(int bytes)
 {
-	if(csp_buffer_init(10, 200)<0)
+	if(csp_buffer_init(1, bytes)<0)
 	printf("could not initialize buffer\n");
 
 	csp_conf_t csp_conf;

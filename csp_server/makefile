@@ -6,7 +6,7 @@ HDRF = ./src/interfaces/csp_if_can_pbuf.h
 all: parameter_service
 
 # We gaan executable print_parameter_list maken
-parameter_service: parameterservice.c GSenseHal.c parameterservice.h GSenseHal.h $(SRCFUDP)
+parameter_service: parameterservice.c GSenseHal.c parameterservice.h GSenseHal.h parameterlist.h $(SRCFUDP)
 	$(CC) -o parameter_service parameterservice.c GSenseHal.c $(SRCFUDP) $(HDRF) $(CFLAGS)
 
 test: test.c ./src/interfaces/csp_if_udp.c
