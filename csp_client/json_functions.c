@@ -219,6 +219,7 @@ int set_value_in_jobject(json_object * jparameter, uint8_t * data, int index_of_
 }
 
 void set_updated(int amountOfIds){
+
 	struct json_object * jobj;
 	jobj = json_object_new_object();
 	struct json_object * jobj_array = get_json_from_file();
@@ -229,7 +230,6 @@ void set_updated(int amountOfIds){
 		for(int j = 0; j < amountOfIds; j++){
 			int id = json_object_get_int(json_object_object_get(jparameter,"id"));
 			if(idArray[j] == id) {
-				printf("id: %d\n", id);
 				json_object_set_boolean(json_object_object_get(jparameter,"updated"),true);
 			}
 		}
@@ -238,10 +238,12 @@ void set_updated(int amountOfIds){
 	json_object_object_add(jobj, "parameters", jobj_array);
 	json_object_to_file_ext("parameters.json", jobj, JSON_FLAG);
 	json_object_put(parsed_json);
+
 }
 
 void print_list()
 {
+
 	struct json_object * jobj;
 	jobj = json_object_new_object();
 	struct json_object * jobj_array = get_json_from_file(); //getting the amount of different id's
@@ -252,6 +254,7 @@ void print_list()
 }
 
 struct json_object * get_json_from_file(){ // open json file, read all the json_objects and put them in the json_object pointer lists
+	
 	char buffer[JSON_MAX_SIZE];
 	int array_size;
 	int succes;

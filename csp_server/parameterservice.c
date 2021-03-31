@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 	// packet->data[0] = 1;
 	// packet->length = 1;
 	// listen_in(packet->data, packet->length);
+	
 while(1){
 
 		csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
