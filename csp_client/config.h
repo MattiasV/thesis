@@ -4,8 +4,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define MY_ADDRESS  1     // Address of local CSP node
-#define IP "10.0.2.15"      // Address of server
+//UDP things
+#define MY_ADDRESS 11
+#define DEST_IP "0.0.0.0"
+#define DEST_ADDR 6
+#define DEST_PORT 10
+#define TIMEOUT 1000
 
 union{
   uint8_t u8bytes[4];

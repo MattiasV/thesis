@@ -5,7 +5,7 @@
        "description": "VersionNr",
        "datatype": 1,
        "offset": 0,
-       "value": 20,
+       "value": 0,
        "updated": false
      },
      {
@@ -13,7 +13,7 @@
        "description": "FirmwareD",
        "datatype": 1,
        "offset": 0,
-       "value": 2,
+       "value": 0,
        "updated": false
      },
      {

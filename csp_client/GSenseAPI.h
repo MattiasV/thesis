@@ -16,14 +16,6 @@
 
 #include "./src/csp_qfifo.h"
 
-
-//UDP things
-#define MY_ADDRESS 11
-#define DEST_IP "0.0.0.0"
-#define DEST_ADDR 6
-#define DEST_PORT 10
-#define TIMEOUT 1000
-
 // Communicatiesysteem
 #define REFRESH_ID 0
 #define DOWNLOAD_ID 1
@@ -68,6 +60,8 @@ uint8_t * idArray;
 void download_list();
 int load_list();
 void check_refresh(uint8_t refresh);
+void get_parameter_command(uint8_t * data, int length, int amountOfIds);
+
 
 // Handige functies die we overal gebruiken
 csp_iface_t * init_udp();

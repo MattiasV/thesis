@@ -44,8 +44,8 @@ int main(int argc, char* argv[])
 		}
 		bytesToSend[i+1] = parameterId;
 	}
-	printf("argc: %d\n", argc);
-	send_to_server(bytesToSend, argc, size);
+	
+	get_parameter_command(bytesToSend, argc, size);
 
 	free(idArray);
 	free(bytesToSend);

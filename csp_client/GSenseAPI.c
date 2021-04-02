@@ -41,6 +41,14 @@ void check_refresh(uint8_t refresh){
 	}
 }
 
+void get_parameter_command(uint8_t * data, int length, int amountOfIds){
+
+	send_to_server(data, length, amountOfIds);
+	csp_packet_t * recv_packet = returned_from_server();
+	check_packet(recv_packet, amountOfIds);
+
+}
+
 
 void send_to_server(uint8_t * data, int length, int amountOfIds){
 
@@ -95,6 +103,7 @@ void check_packet(csp_packet_t * packet, int amountOfIds){
 			set_updated(amountOfIds);
 			break;
 		case GET_ID:
+			printf("AAA\n");
 			add_values(data, sizeof(data));
 			break;
 		case DOWNLOAD_ID:
@@ -109,39 +118,19 @@ void check_packet(csp_packet_t * packet, int amountOfIds){
 
 csp_iface_t * init_udp(int bytes)
 {
-	/* Init CSP and CSP buffer system */
- csp_conf_t csp_conf;
- csp_conf_get_defaults(&csp_conf);
- csp_conf.address = MY_ADDRESS;
-	 if (csp_init(&csp_conf) != CSP_ERR_NONE || csp_buffer_init(10, 1000) != CSP_ERR_NONE) {
-			 printf("Failed to init CSP\r\n");
-			 return NULL;
-	 }
+	if(csp_buffer_init(1, bytes)<0)
+	printf("could not initialize buffer\n");
 
-	 /*configure the CSP ip-udp interface*/
-	 printf("Initialize UDP/IP interface, destination = %s\r\n",DEST_IP);
-	 static csp_iface_t udp_iface;
-	 csp_if_udp_init(&udp_iface,DEST_IP);
+	csp_conf_t csp_conf;
+	csp_conf_get_defaults(&csp_conf);
+	csp_conf.address = MY_ADDRESS;
+	if(csp_init(&csp_conf) < 0)
+	printf("could not initialize csp\n");
 
-	 csp_rtable_print();
-	 /*Setup default route to UDP*/
-	 printf("Configure routing table : all outgoing traffic to UDP\r\n");
-	 if(csp_rtable_set(CSP_DEFAULT_ROUTE,0, &udp_iface,0) != CSP_ERR_NONE) {
-		 printf("Failed to create routing entry\r\n");
-		 return NULL;
-	 }
-	 if(csp_rtable_set(6,0, &udp_iface,6) != CSP_ERR_NONE) {
-		 printf("Failed to create routing entry\r\n");
-		 return NULL;
-	 }
-	 csp_rtable_print();
+	static csp_iface_t udp_iface;
+	csp_if_udp_init(&udp_iface, DEST_IP );
+	csp_rtable_set(0,0, &udp_iface, CSP_NODE_MAC);
 
-	 /*initiate the CSP transaction*/
-	 printf("Initiate the CSP transaction\r\n");
-	 if(csp_transaction(CSP_PRIO_NORM, DEST_ADDR, DEST_PORT, CSP_MAX_DELAY, "Hello World", 12, NULL, 0)<1){
-			 printf("CSP transcation failed\r\n");
-			 return NULL;
-	 }
 
   return &udp_iface;
 }
