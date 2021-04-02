@@ -3,16 +3,14 @@
 
 void discovery_memory()
 {
-	int sockfd, size;
-	uint8_t id;
+
 	uint8_t send_buffer[1];
-	Memory memory_list[DIFFERENT_MEMORYS];
 
 	send_buffer[0] = DISCOVERY_ID;
 
 	// Ask for memory list
 	csp_iface_t * iface = init_udp(DIFFERENT_MEMORYS*sizeof(Memory));
-	//send_to_server(iface, send_buffer, sizeof(send_buffer));
+	send_to_server(iface, send_buffer, sizeof(send_buffer));
 
 	// UDP Receive memory_list
 	csp_packet_t * packet = received_from_server();

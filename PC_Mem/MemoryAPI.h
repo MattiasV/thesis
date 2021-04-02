@@ -21,11 +21,6 @@ typedef struct
     int size;
 } Memory;
 
-union{
-	uint8_t mem_list_bytes[4*sizeof(Memory)];
-	Memory mem_list[4];
-}memory_list_union;
-
 
 //UDP
 #define MY_ADDRESS 11
@@ -41,6 +36,12 @@ union{
 
 // Memory constants
 #define DIFFERENT_MEMORYS 4
+
+
+union{
+  uint8_t mem_list_bytes[DIFFERENT_MEMORYS*sizeof(Memory)];
+  Memory mem_list[DIFFERENT_MEMORYS];
+}memory_list_union;
 
 // Discovery service
 void discovery_memory();

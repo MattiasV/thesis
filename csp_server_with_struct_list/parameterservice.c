@@ -109,123 +109,17 @@ void send_refresh()
 void send_parameter_list()
 {
 
-
-	uint8_t list_in_bytes[sizeof(parameterlist)];
-	bzero(list_in_bytes, sizeof(parameterlist));
-	list_in_bytes[0] = DOWNLOAD_ID;
-	int list_in_bytes_index = 1;
-	for(int i = 0; i <sizeof(parameterlist)/sizeof(parameter_t);i++){
-		//set ID in bytes
-		printf("ID\n");
-		printf("data[%d]: %d\n", list_in_bytes_index, parameterlist[i].id);
-		list_in_bytes[list_in_bytes_index++] = parameterlist[i].id;
-		printf("\n");
-
-		//set description in bytes
-		printf("DESC\n");
-		for(int j = 0; parameterlist[i].description[j] != '\0' ;j++){
-			printf("data[%d]: %c\n", list_in_bytes_index, parameterlist[i].description[j]);
-			list_in_bytes[list_in_bytes_index++] = parameterlist[i].description[j];
-		}
-		printf("data[%d]: %c\n", list_in_bytes_index,'\0');
-		list_in_bytes[list_in_bytes_index++] = '\0';
-		printf("\n");
-
-		//set datatype in bytes
-		printf("DATATYPE\n");
-		printf("data[%d]: %d\n", list_in_bytes_index,parameterlist[i].datatype);
-		list_in_bytes[list_in_bytes_index++] = parameterlist[i].datatype;
-		printf("\n");
-
-		//set  offset in bytes
-		printf("OFFSET\n");
-		fourBytesUnion.u32bytes = parameterlist[i].offset;
-		for(int j = 0; j < 4; j++){
-			printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.u8bytes[j]);
-			list_in_bytes[list_in_bytes_index++] = fourBytesUnion.u8bytes[j];
-		}
-		printf("\n");
-
-		//set value in bytes
-		printf("VALUE\n");
-		int index = check_datatype_and_put_in_byte_array(list_in_bytes, parameterlist[i].datatype, list_in_bytes_index, i);
-		list_in_bytes_index = index;
-		printf("\n");
-
-		//set updated in bytes
-		printf("UPDATED\n");
-		printf("data[%d]: %d\n", list_in_bytes_index, parameterlist[i].updated);
-		list_in_bytes[list_in_bytes_index++] = parameterlist[i].updated;
-		printf("\n");
-
+	for(int i = 0; i < DIFFERENT_PARAMETERS; i++){
+		parameter_list_union.par_list[i] = parameterlist[i];
 	}
-
-	csp_buffer_init(1,list_in_bytes_index+1);
-	csp_packet_t * packet;
-	packet = csp_buffer_get(sizeof(parameterlist) + 1);
-	for(int i = 0; i < list_in_bytes_index+1; i ++){
-		packet->data[i] = list_in_bytes[i];
+	csp_buffer_init(1,sizeof(parameterlist));
+	csp_packet_t * packet = csp_buffer_get(sizeof(parameterlist));
+	for(int i = 0; i < sizeof(parameterlist); i++){
+		packet->data[i] = parameter_list_union.par_list_bytes[i];
 	}
-	packet->length = list_in_bytes_index+1;
 	csp_if_udp_tx(&iface, packet, TIMEOUT);
 }
 
-int check_datatype_and_put_in_byte_array(uint8_t * list_in_bytes, int datatype, int list_in_bytes_index, int parameterlist_index){
-
-	int value = parameterlist[parameterlist_index].value;
-
-	switch(datatype){
-
-		case u8:
-			printf("u8\n");
-			printf("data[%d]: %d\n", list_in_bytes_index, value);
-			list_in_bytes[list_in_bytes_index++] = value;
-			break;
-
-		case i8:
-			printf("i8\n");
-			printf("data[%d]: %d\n", list_in_bytes_index, value);
-			list_in_bytes[list_in_bytes_index++] = value;
-			break;
-
-		case u16:
-			printf("u16\n");
-			fourBytesUnion.u16bytes[0] = value;
-			printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.u8bytes[0]);
-			list_in_bytes[list_in_bytes_index++] = fourBytesUnion.u8bytes[0];
-			printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.u8bytes[1]);
-			list_in_bytes[list_in_bytes_index++] = fourBytesUnion.u8bytes[1];
-			break;
-
-		case i16:
-			printf("i16\n");
-			fourBytesUnion.i16bytes[0] = value;
-			printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.i8bytes[0]);
-			list_in_bytes[list_in_bytes_index++] = fourBytesUnion.i8bytes[0];
-			printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.i8bytes[1]);
-			list_in_bytes[list_in_bytes_index++] = fourBytesUnion.i8bytes[1];
-			break;
-
-		case u32:
-			printf("u32\n");
-			fourBytesUnion.u32bytes = value;
-			for(int i = 0; i < 4; i++){
-				printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.u8bytes[i]);
-				list_in_bytes[list_in_bytes_index++] = fourBytesUnion.u8bytes[i];
-			}
-			break;
-
-		case i32:
-			printf("i32\n");
-			fourBytesUnion.i32bytes = value;
-			for(int i = 0; i < 4; i++){
-				printf("data[%d]: %d\n", list_in_bytes_index, fourBytesUnion.i8bytes[i]);
-				list_in_bytes[list_in_bytes_index++] = fourBytesUnion.i8bytes[i];
-			}
-			break;
-	}
-	return list_in_bytes_index;
-}
 
 void set_parameter(uint8_t * data, int length)
 {

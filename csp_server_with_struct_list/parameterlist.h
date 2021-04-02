@@ -29,4 +29,12 @@ const parameter_t parameterlist[] = {
 		{4,"Test", i32,	TEST, 0, 0}
 };
 
+#define DIFFERENT_PARAMETERS sizeof(parameterlist)/sizeof(parameter_t)
+
+union{
+  uint8_t par_list_bytes[sizeof(parameterlist)];
+  Memory par_list[DIFFERENT_PARAMETERS];
+}parameter_list_union;
+
+
 #endif
