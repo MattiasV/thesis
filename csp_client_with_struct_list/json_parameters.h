@@ -21,7 +21,7 @@ typedef struct {
 union{
   uint8_t par_list_bytes[DIFFERENT_PARAMETERS*sizeof(parameter_t)];
   Memory par_list[DIFFERENT_PARAMETERS];
-}memory_list_union;
+}parameter_list_union;
 
 
 #endif //_JSON_PARAMETERS_H_

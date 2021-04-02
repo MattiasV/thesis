@@ -13,106 +13,25 @@ void store_list_from_bytes(uint8_t * data, int length)
 
 	jobj = json_object_new_object();
 	jobjarray = json_object_new_array();
-	for(int i = 0; i < length-1;){
-		jparameter = json_object_new_object();
-		int index = i;
-		index = get_byte_data_in_json(jparameter, data, i);
-		i = index;
-		json_object_array_add(jobjarray, jparameter);
+	for(int i = 0; i < length; i++){
+		parameter_list_union.par_list_bytes[i] = data[i];
 	}
+
+	jparameter = json_object_new_object();
+	int index = i;
+	index = get_byte_data_in_json(jparameter, parameter_list_union.par_list, length/sizeof(parameter_t));
+	i = index;
+	json_object_array_add(jobjarray, jparameter);
 	json_object_object_add(jobj, "parameters", jobjarray);
 	json_object_to_file_ext("parameters.json", jobj, JSON_FLAG);
 }
 
 
-int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of_data){
+int get_par_list_in_json(json_object * jparameter, parameter_t * parameterlist, int size){
 
-	for(int i = 0; i < sizeof(json_parameter_list)/(sizeof(char *)*2); i++){
-		//printf("i: %d\n", i);
-		char description[MAX_DESCRIPTION_SIZE];
-		char charparameter[1];
-		bzero(description, MAX_DESCRIPTION_SIZE);
-		int datatype;
-		int k = 1; //this is used for the last byte of the string
-		int index = 0; //needed when adding a value
-		//printf("type: %d\n", json_parameter_list[i].parameter_type);
-		switch(json_parameter_list[i].parameter_type){
-
-			case none:
-				printf("none datatype...\n");
-				break;
-
-			case u8:
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[index_of_data++]));
-				break;
-
-			case i8:
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(data[index_of_data++]));
-				break;
-
-			case u16:
-				fourBytesUnion.u8bytes[0] = data[index_of_data++];
-				fourBytesUnion.u8bytes[1] = data[index_of_data++];
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.u16bytes[0]));
-				break;
-
-			case i16:
-				fourBytesUnion.u8bytes[0] = data[index_of_data++];
-				fourBytesUnion.u8bytes[1] = data[index_of_data++];
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i16bytes[0]));
-				break;
-
-			case u32:
-				for(int j = 0; j < 4; j++){
-					fourBytesUnion.u8bytes[j] = data[index_of_data++];
-				}
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.u32bytes));
-				break;
-
-			case i32:
-				for(int j = 0; j < 4; j++){
-					fourBytesUnion.i8bytes[j] = data[index_of_data++];
-				}
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_int(fourBytesUnion.i32bytes));
-				break;
-
-			case f32:
-				for(int j = 0; j < 4; j++){
-					fourBytesUnion.u8bytes[j] = data[index_of_data++];
-				}
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_double(fourBytesUnion.fbytes));
-				break;
-
-			case c:
-				charparameter[0] = data[index_of_data++];
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_string(charparameter));
-				break;
-
-			case s:
-				for(int j = 0; data[index_of_data] != '\0'; j++){
-					description[j] = data[index_of_data++]; // fill parameter->description char
-					k++;
-				}
-				description[k] = data[index_of_data++];
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_string(description));
-				break;
-
-			case dtype:
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key,json_object_new_int(0)); //initialize the value op 0
-				datatype = json_object_get_int(json_object_object_get(jparameter, "datatype"));
-				index = set_value_in_jobject(jparameter, data, index_of_data);
-				index_of_data = index;
-				break;
-
-			case b:
-				json_object_object_add(jparameter, json_parameter_list[i].parameter_key, json_object_new_boolean(data[index_of_data++]));
-
-			default:
-				printf("default at line: %d\n", __LINE__);
-				break;
-		}
+	for(int i = 0; i < size; i++){
+		//set in json to be coded
 	}
-	return index_of_data;
 
 }
 
