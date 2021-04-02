@@ -11,17 +11,14 @@ void discovery_memory()
 	send_buffer[0] = DISCOVERY_ID;
 
 	// TCP Send message
-	sockfd = make_connection();
-	send(sockfd,send_buffer, sizeof(send_buffer),0);
+	//send(sockfd,send_buffer, sizeof(send_buffer),0);
 
 	// TCP Recieve memory_list
-	recv(sockfd, memory_list, sizeof(memory_list), 0);
+	//recv(sockfd, memory_list, sizeof(memory_list), 0);
 
     // Print de memory lijst
 	print_memory(memory_list);
 
-	// TCP socket sluiten
-	close(sockfd);
 }
 
 void print_memory(Memory memory_list[])
@@ -64,9 +61,7 @@ void upload_memory(uint8_t mem_id, uint32_t offset, char *file_name)
 
 
     // Sending the buffer over TCP
-    int sockfd = make_connection();
-    send(sockfd,send_buffer, sizeof(send_buffer),0);
-    close(sockfd);
+    //send(sockfd,send_buffer, sizeof(send_buffer),0);
 }
 
 uint8_t * prepare_preamble(uint8_t msg_id, uint8_t mem_id, uint32_t offset, uint32_t data_size)
@@ -101,7 +96,6 @@ void download_memory(uint8_t mem_id, uint32_t offset, uint32_t data_size, char *
 	uint8_t *data_stream;
 	uint8_t *offset_array;
 	uint8_t *size_array;
-	// printf("Filelength bedraagt %d bytes \n", data_size);
 
 	// 10 bytes extra for info
 	uint8_t send_buffer[data_size + 10];
@@ -122,22 +116,18 @@ void download_memory(uint8_t mem_id, uint32_t offset, uint32_t data_size, char *
 		send_buffer[i+6] = size_array[i];
 	}
 
-	// Sending the buffer over TCP
-	int sockfd = make_connection();
-	send(sockfd,send_buffer, sizeof(send_buffer),0);
+	csp_iface_t * iface = init_udp;
+	send_to_server(iface, send_buffer, sizeof(sendbuffer));
 
 	// Wachten op het antwoord
-	uint8_t recv_buffer[data_size];
-	recv(sockfd, recv_buffer, sizeof(recv_buffer), 0);
-	printf("First datachunk is : %c \n", recv_buffer[0]);
+	csp_packet_t * recv_packet = received_from_server();
+	printf("First datachunk is : %c \n", recv_packet->data[0]);
 
 	// Antwoord storen in file
 	FILE *fp;
 	fp = fopen(file_name, "w");
 	fwrite(recv_buffer, sizeof(recv_buffer[0]), sizeof(recv_buffer)/sizeof(recv_buffer[0]),fp);
-
-	// Socket sluiten
-	close(sockfd);
+	fclose(fp);
 
 }
 
@@ -224,42 +214,58 @@ uint32_t get_file_size(char *file_name)
 }
 
 
-// TCP_USE
-int make_connection()
-{
-    int sockfd, connfd;
-    struct sockaddr_in servaddr, cli;
+csp_iface_t * init_udp(){
 
-	// zien dat we steeds met een cleane socket beginnen
-	int true = 1;
-	setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&true,sizeof(int));
+	/* Init CSP and CSP buffer system */
+ csp_conf_t csp_conf;
+ csp_conf_get_defaults(&csp_conf);
+ csp_conf.address = MY_ADDRESS;
+	 if (csp_init(&csp_conf) != CSP_ERR_NONE || csp_buffer_init(10, 1000) != CSP_ERR_NONE) {
+			 printf("Failed to init CSP\r\n");
+			 return NULL;
+	 }
 
-    // socket create and varification
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        printf("TCP : socket creation failed...\n");
-        exit(0);
-    }
-    else
-        printf("TCP : Socket successfully created..\n");
-    bzero(&servaddr, sizeof(servaddr));
+	 /*configure the CSP ip-udp interface*/
+	 printf("Initialize UDP/IP interface, destination = %s\r\n",DEST_IP);
+	 static csp_iface_t udp_iface;
+	 csp_if_udp_init(&udp_iface,DEST_IP);
 
-    // HIER MOETEN WE IP VAN DE PC GAAN INGEVEN DENK
+	 csp_rtable_print();
+	 /*Setup default route to UDP*/
+	 printf("Configure routing table : all outgoing traffic to UDP\r\n");
+	 if(csp_rtable_set(CSP_DEFAULT_ROUTE,0, &udp_iface,0) != CSP_ERR_NONE) {
+		 printf("Failed to create routing entry\r\n");
+		 return NULL;
+	 }
+	 if(csp_rtable_set(6,0, &udp_iface,6) != CSP_ERR_NONE) {
+		 printf("Failed to create routing entry\r\n");
+		 return NULL;
+	 }
+	 csp_rtable_print();
 
-    // assign IP, PORT
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr(STARTERKIT_IP);
-    servaddr.sin_port = htons(PORT);
+	 /*initiate the CSP transaction*/
+	 printf("Initiate the CSP transaction\r\n");
+	 if(csp_transaction(CSP_PRIO_NORM, DEST_ADDR, DEST_PORT, CSP_MAX_DELAY, "Hello World", 12, NULL, 0)<1){
+			 printf("CSP transcation failed\r\n");
+			 return NULL;
+	 }
 
-    // connect the client socket to server socket
-    if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) {
-        printf("TCP : connection with the server failed...\n");
-        int error_code = connect(sockfd, (SA*)&servaddr, sizeof(servaddr));
-        printf("Failed with error code : %d \n", error_code);
-        exit(0);
-    }
-    else
-        printf("TCP : connected to the server..\n");
+	return &udp_iface;
 
-    return sockfd;
+}
+
+
+void send_to_server(csp_iface_t * iface, uint8_t * data, int length){
+	csp_buffer_init(1,length);
+	csp_packet_t * packet = csp_buffer_get(length);
+	for(int i = 0; i < length; i++){
+		packet->data[i] = data[i];
+	}
+	packet->length = length;
+	csp_if_udp_tx(iface, packet, TIMEOUT);
+}
+
+
+csp_packet_t * received_from_server(){
+
 }

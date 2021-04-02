@@ -37,6 +37,7 @@ int sockfd;
 #define FLASH_ID 2
 #define RAM_ID 3
 
+#define MAX_RECEIVING_BYTES 4096
 
 // functies
 void discovery();

@@ -6,6 +6,13 @@
 #include <arpa/inet.h>
 #include <stdint.h>
 
+#include <csp/csp.h>
+#include <csp/arch/csp_thread.h>
+#include <csp/interfaces/csp_if_udp.h>
+#include <csp/csp_types.h>
+
+#include "./src/csp_qfifo.h"
+
 // Memory struct
 typedef struct
 {
@@ -14,11 +21,12 @@ typedef struct
     int size;
 } Memory;
 
-//TCP
-#define PORT 8080
-#define MAX 2
-#define SA struct sockaddr
-#define STARTERKIT_IP "192.168.0.107"
+//UDP
+#define MY_ADDRESS 11
+#define DEST_IP "192.168.10.103"
+#define DEST_ADDR 6
+#define DEST_PORT 10
+#define TIMEOUT 1000
 
 // Communicatiesysteem
 #define DISCOVERY_ID 0
@@ -44,4 +52,6 @@ void download_memory(uint8_t mem_id, uint32_t offset, uint32_t data_size, char *
 char * get_string_cmd_download(int argc, char* argv[]);
 
 // Communication function
-int make_connection();
+csp_iface_t * init_udp();
+void send_to_server(csp_iface_t * iface, uint8_t * data, int length);
+csp_packet_t * received_from_server();

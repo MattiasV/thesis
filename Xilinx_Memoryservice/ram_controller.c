@@ -1,5 +1,6 @@
 #include "controller.h"
 
+
 void upload_ram(uint32_t offset, uint32_t data_size, uint8_t data_stream[])
 {
 	// Part 1 : open the RAM register with the uio driver + mmap
@@ -18,6 +19,7 @@ void upload_ram(uint32_t offset, uint32_t data_size, uint8_t data_stream[])
 	// Part 3 : Unmap the RAM
 	munmap(write_addr,RAM_MAP_SIZE);
 }
+
 
 uint8_t * download_stream_ram(uint32_t offset, uint32_t size)
 {
@@ -46,6 +48,7 @@ uint8_t * download_stream_ram(uint32_t offset, uint32_t size)
 	munmap(address,RAM_MAP_SIZE);
 	return send_buffer;
 }
+
 
 int ram_open_uio()
 {
@@ -77,5 +80,3 @@ void print_ram(uint32_t offset, uint32_t size)
 
 	munmap(address,RAM_MAP_SIZE);
 }
-
-

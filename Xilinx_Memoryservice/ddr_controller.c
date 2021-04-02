@@ -19,6 +19,7 @@ void upload_ddr(uint32_t offset, uint32_t data_size, uint8_t data_stream[])
 	munmap(write_addr,DDR_MAP_SIZE);
 }
 
+
 uint8_t * download_stream_ddr(uint32_t offset, uint32_t size)
 {
 	uint8_t *send_buffer = (uint8_t *) malloc(sizeof(uint8_t)*size);
@@ -47,12 +48,14 @@ uint8_t * download_stream_ddr(uint32_t offset, uint32_t size)
 	return send_buffer;
 }
 
+
 int ddr_open_uio()
 {
 	int fd = open("/dev/uio2", O_RDWR);
 	if(fd == 0){ printf("Cannot open DDR UIO file \n");}
 	return fd;
 }
+
 
 void print_ddr(uint32_t offset, uint32_t size)
 {
@@ -76,4 +79,3 @@ void print_ddr(uint32_t offset, uint32_t size)
 
 	munmap(address,DDR_MAP_SIZE);
 }
-
