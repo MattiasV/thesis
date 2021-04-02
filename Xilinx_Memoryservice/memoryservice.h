@@ -5,9 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "controller.h"
-#include "server.h"
+#include <csp/csp.h>
+#include <csp/arch/csp_thread.h>
+#include <csp/interfaces/csp_if_udp.h>
+#include <csp/csp_types.h>
 
+#include "./src/csp_qfifo.h"
+#include "controller.h"
 
 typedef struct
 {
@@ -23,9 +27,17 @@ Memory memory_list[] = {
 		{3,"RAM ",32}
 };
 
-// TCP
-int sockfd;
+union{
+	uint8_t mem_list_bytes[sizeof(memory_list)];
+	Memory mem_list[sizeof(memory_list)/sizeof(Memory)];
+}memory_list_union;
 
+//UDP
+#define MY_ADDRESS 11
+#define DEST_IP "0.0.0.0"
+#define DEST_ADDR 6
+#define DEST_PORT 10
+#define TIMEOUT 1000
 
 // MSG system again
 #define DISCOVERY_ID 0
@@ -40,8 +52,15 @@ int sockfd;
 #define MAX_RECEIVING_BYTES 4096
 
 // functies
-void discovery();
-void upload(uint8_t buffer[]);
-void download(uint8_t buff[]);
+void discovery(csp_iface_t * iface);
+void upload(csp_iface_t * iface, uint8_t * data);
+void download(csp_iface_t * iface, uint8_t * data);
+void check_packet(csp_iface_t * iface, csp_packet_t * packet);
+
+//UDP functions
+csp_iface_t * init_udp(int length);
+csp_packet_t * receiving_from_client();
+void send_to_client(csp_iface_t * iface, uint8_t * data, int length);
+
 
 #endif /* MEMORYSERVICE_H */

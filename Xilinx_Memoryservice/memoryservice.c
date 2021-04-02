@@ -3,73 +3,54 @@
 int main(int argc, char *argv[])
 {
 
-
-	// SETTING UP UDP CSP SERVER AND LISTEN FOR INCOMMING MSG
-
-	if(csp_buffer_init(1, MAX_RECEIVING_BYTES)<0)			// initialize 10 packets with 80 bytes each
-	return -1;
-
-	csp_conf_t csp_conf;
-	csp_conf_get_defaults(&csp_conf);
-	csp_conf.address = MY_ADDRESS;
-	if(csp_init(&csp_conf) < 0)			// initialize csp for the further use of ports and qfifo
-	return -1;
-
-	static csp_iface_t iface;
-	csp_if_udp_init(&iface, IP );
-	csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
-
-	// FOR TESTING
-	// csp_buffer_init(1,1);
-	// csp_packet_t * packet;
-	// packet = csp_buffer_get(1);
-	// packet->data[0] = 1;
-	// packet->length = 1;
-	// listen_in(packet->data, packet->length);
-
-	csp_packet_t * packet;
+	csp_iface_t * iface = init_udp(MAX_RECEIVING_BYTES);
 
 	while(1){
-
-		csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
-		csp_qfifo_t input;
-		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
-			continue;
-		}
-		packet = input.packet;
+		csp_packet_t * packet = receiving_from_client();
+		check_packet(iface,packet);
 	}
 
-	// Everything for TCP
-	sockfd = setup_socket();
-	int case_id = packet->data[0];;
+}
+
+void check_packet(csp_iface_t * iface, csp_packet_t * packet){
+
+	int case_id = packet->data[0];
 
 	switch(case_id)
 	{
 		case DISCOVERY_ID:
 			printf("ID recv for discovery \n");
-			discovery();
+			discovery(iface);
 			break;
 		case UPLOAD_ID:
 			printf("ID recv for uploading \n");
-			upload(packet->data);
+			upload(iface,packet->data);
 			break;
 		case DOWNLOAD_ID:
 			printf("ID recv for downloading \n");
-			download(packet->data);
+			download(iface,packet->data);
 			break;
 		default:
 			printf("Default case \n");
 			break;
 	}
+
 }
 
-void discovery()
+void discovery(csp_iface_t * iface)
 {
-	send(sockfd, memory_list, sizeof(memory_list), 0);
+
+	for(int i = 0; i < sizeof(memory_list)/sizeof(Memory); i++){
+		memory_list_union.mem_list[i] = memory_list[i];
+	}
+	send_to_client(iface, memory_list_union.mem_list_bytes, sizeof(memory_list));
+
 }
 
-void upload(uint8_t buff[])
+
+void upload(csp_iface_t * iface, uint8_t * buff)
 {
+
 	uint8_t mem_id;
 	uint32_t offset;
 	uint32_t size;
@@ -108,8 +89,9 @@ void upload(uint8_t buff[])
 
 }
 
-void download(uint8_t buff[])
+void download(csp_iface_t * iface, uint8_t * buff)
 {
+
 	uint8_t mem_id;
 	uint32_t offset;
 	uint32_t size;
@@ -151,6 +133,61 @@ void download(uint8_t buff[])
 		// printf("The %d 'th element is : %c \n", i, send_buffer[i]);
 	}
 
-	send(sockfd, send_buffer, sizeof(send_buffer), 0);
+	send_to_client(iface, send_buffer, size);
+
+}
+
+csp_iface_t * init_udp(int length){
+
+	// SETTING UP UDP CSP SERVER AND LISTEN FOR INCOMMING MSG
+
+	if(csp_buffer_init(1, MAX_RECEIVING_BYTES)<0)			// initialize 10 packets with 80 bytes each
+	return NULL;
+
+	csp_conf_t csp_conf;
+	csp_conf_get_defaults(&csp_conf);
+	csp_conf.address = MY_ADDRESS;
+	if(csp_init(&csp_conf) < 0)			// initialize csp for the further use of ports and qfifo
+	return NULL;
+
+	static csp_iface_t udp_iface;
+	csp_if_udp_init(&udp_iface, DEST_IP );
+	csp_rtable_set(0,0, &udp_iface, CSP_NODE_MAC);
+
+	return &udp_iface;
+
+}
+
+
+csp_packet_t * receiving_from_client(){
+
+	csp_packet_t * recv_packet;
+
+	while(1){
+
+		csp_buffer_init(1,MAX_RECEIVING_BYTES);
+		csp_qfifo_t input;
+		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
+			continue;
+		}
+		recv_packet = input.packet;
+	}
+
+	return recv_packet;
+
+}
+
+
+void send_to_client(csp_iface_t * iface, uint8_t * data, int length){
+
+	csp_buffer_init(1,length);
+	csp_packet_t * packet = csp_buffer_get(length);
+
+	for(int i = 0; i < length; i++){
+		packet->data[i] = data[i];
+	}
+	packet->length = length;
+
+	csp_if_udp_tx(iface, packet, TIMEOUT);
 
 }
