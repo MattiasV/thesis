@@ -10,14 +10,18 @@ void discovery_memory()
 
 	send_buffer[0] = DISCOVERY_ID;
 
-	// TCP Send message
-	//send(sockfd,send_buffer, sizeof(send_buffer),0);
+	// Ask for memory list
+	csp_iface_t * iface = init_udp(DIFFERENT_MEMORYS*sizeof(Memory));
+	//send_to_server(iface, send_buffer, sizeof(send_buffer));
 
-	// TCP Recieve memory_list
-	//recv(sockfd, memory_list, sizeof(memory_list), 0);
+	// UDP Receive memory_list
+	csp_packet_t * packet = received_from_server();
+	for(int i = 0; i < packet->length; i++){
+		memory_list_union.mem_list_bytes[i] = packet->data[i];
+	}
 
-    // Print de memory lijst
-	print_memory(memory_list);
+  // Print de memory list
+	print_memory(memory_list_union.mem_list);
 
 }
 
@@ -59,9 +63,8 @@ void upload_memory(uint8_t mem_id, uint32_t offset, char *file_name)
         printf("send_buffer index 10 + %d : %c \n", i, *(data_stream + i));
     }
 
-
-    // Sending the buffer over TCP
-    //send(sockfd,send_buffer, sizeof(send_buffer),0);
+		csp_iface_t * iface = init_udp(sizeof(send_buffer));
+    send_to_server(iface, send_buffer, sizeof(send_buffer));
 }
 
 uint8_t * prepare_preamble(uint8_t msg_id, uint8_t mem_id, uint32_t offset, uint32_t data_size)
@@ -116,8 +119,8 @@ void download_memory(uint8_t mem_id, uint32_t offset, uint32_t data_size, char *
 		send_buffer[i+6] = size_array[i];
 	}
 
-	csp_iface_t * iface = init_udp;
-	send_to_server(iface, send_buffer, sizeof(sendbuffer));
+	csp_iface_t * iface = init_udp(sizeof(send_buffer));
+	send_to_server(iface, send_buffer, sizeof(send_buffer));
 
 	// Wachten op het antwoord
 	csp_packet_t * recv_packet = received_from_server();
@@ -126,7 +129,7 @@ void download_memory(uint8_t mem_id, uint32_t offset, uint32_t data_size, char *
 	// Antwoord storen in file
 	FILE *fp;
 	fp = fopen(file_name, "w");
-	fwrite(recv_buffer, sizeof(recv_buffer[0]), sizeof(recv_buffer)/sizeof(recv_buffer[0]),fp);
+	fwrite(recv_packet->data, 1, recv_packet->length ,fp);
 	fclose(fp);
 
 }
@@ -214,20 +217,20 @@ uint32_t get_file_size(char *file_name)
 }
 
 
-csp_iface_t * init_udp(){
+csp_iface_t * init_udp(int length){
 
-	if(csp_buffer_init(10, 100)<0)
+	if(csp_buffer_init(1, length)<0)
 		printf("could not initialize buffer\n");
 
-		csp_conf_t csp_conf;
-		csp_conf_get_defaults(&csp_conf);
-		csp_conf.address = MY_ADDRESS;
-		if(csp_init(&csp_conf) < 0)
-		printf("could not initialize csp\n");
+	csp_conf_t csp_conf;
+	csp_conf_get_defaults(&csp_conf);
+	csp_conf.address = MY_ADDRESS;
+	if(csp_init(&csp_conf) < 0)
+	printf("could not initialize csp\n");
 
-		static csp_iface_t udp_iface;
-		csp_if_udp_init(&udp_iface, IP );
-		csp_rtable_set(0,0, &udp_iface, CSP_NODE_MAC);
+	static csp_iface_t udp_iface;
+	csp_if_udp_init(&udp_iface, DEST_IP );
+	csp_rtable_set(0,0, &udp_iface, CSP_NODE_MAC);
 
 	return &udp_iface;
 
@@ -246,5 +249,18 @@ void send_to_server(csp_iface_t * iface, uint8_t * data, int length){
 
 
 csp_packet_t * received_from_server(){
+
+		csp_packet_t * recv_packet;
+
+		while(1){
+			csp_qfifo_t input;
+			if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
+				continue;
+			}
+			printf("aaa\n");
+			recv_packet = input.packet;
+			break;
+		}
+		return recv_packet;
 
 }

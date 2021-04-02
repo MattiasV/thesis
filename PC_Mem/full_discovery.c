@@ -2,6 +2,7 @@
 
 int main(int argc, char* argv[])
 {
-    discovery_memory();
+  discovery_memory();
+  printf("shutting off\n");
 	return 0;
 }

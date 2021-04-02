@@ -3,18 +3,24 @@
 int main(int argc, char *argv[])
 {
 
-	csp_iface_t * iface = init_udp(MAX_RECEIVING_BYTES);
+	csp_iface_t * iface = init_udp(48);
+	csp_buffer_init(1,4*sizeof(Memory));
+	csp_packet_t * packet = csp_buffer_get(1);
+	packet->data[0] = 0;
+	packet->length = 1;
+	check_packet(iface,packet);
 
-	while(1){
-		csp_packet_t * packet = receiving_from_client();
-		check_packet(iface,packet);
-	}
+	// while(1){
+	//	csp_packet_t * packet = receiving_from_client();
+	//	check_packet(iface,packet);
+	// }
 
 }
 
 void check_packet(csp_iface_t * iface, csp_packet_t * packet){
 
 	int case_id = packet->data[0];
+	csp_buffer_free(packet);
 
 	switch(case_id)
 	{
@@ -43,6 +49,7 @@ void discovery(csp_iface_t * iface)
 	for(int i = 0; i < sizeof(memory_list)/sizeof(Memory); i++){
 		memory_list_union.mem_list[i] = memory_list[i];
 	}
+	printf("sending to client\n");
 	send_to_client(iface, memory_list_union.mem_list_bytes, sizeof(memory_list));
 
 }
@@ -137,11 +144,10 @@ void download(csp_iface_t * iface, uint8_t * buff)
 
 }
 
+
 csp_iface_t * init_udp(int length){
 
-	// SETTING UP UDP CSP SERVER AND LISTEN FOR INCOMMING MSG
-
-	if(csp_buffer_init(1, MAX_RECEIVING_BYTES)<0)			// initialize 10 packets with 80 bytes each
+	if(csp_buffer_init(1, 4*sizeof(Memory))<0)
 	return NULL;
 
 	csp_conf_t csp_conf;
@@ -165,7 +171,6 @@ csp_packet_t * receiving_from_client(){
 
 	while(1){
 
-		csp_buffer_init(1,MAX_RECEIVING_BYTES);
 		csp_qfifo_t input;
 		if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
 			continue;
@@ -182,12 +187,13 @@ void send_to_client(csp_iface_t * iface, uint8_t * data, int length){
 
 	csp_buffer_init(1,length);
 	csp_packet_t * packet = csp_buffer_get(length);
-
+	printf("length: %d\n", length);
 	for(int i = 0; i < length; i++){
 		packet->data[i] = data[i];
 	}
 	packet->length = length;
 
 	csp_if_udp_tx(iface, packet, TIMEOUT);
+	printf("sent to client\n");
 
 }

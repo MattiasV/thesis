@@ -21,6 +21,12 @@ typedef struct
     int size;
 } Memory;
 
+union{
+	uint8_t mem_list_bytes[4*sizeof(Memory)];
+	Memory mem_list[4];
+}memory_list_union;
+
+
 //UDP
 #define MY_ADDRESS 11
 #define DEST_IP "192.168.10.103"
