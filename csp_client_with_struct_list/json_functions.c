@@ -25,7 +25,6 @@ void store_list_from_bytes(uint8_t * data, int length)
 
 	printf("parameterlist[0].description: %s\n", parameter_list_union.par_list[0].description);
 
-
 	get_par_list_in_json(jobjarray, parameter_list_union.par_list, length/sizeof(parameter_t));
 
 	json_object_object_add(jobj, "parameters", jobjarray);
@@ -42,8 +41,6 @@ Deze functie gaat alle keys af horende bij elke variable in de struct en schrijf
 */
 //SYNCHRONIZATION NEEDED
 void get_par_list_in_json(json_object * jobjarray, parameter_t * parameterlist, int size){
-
-
 
 	for(int i = 0; i < size; i++){
 		struct json_object * jparameter = json_object_new_object();
