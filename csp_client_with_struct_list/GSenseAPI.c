@@ -1,5 +1,6 @@
 #include "GSenseAPI.h"
 #include "json_functions.h"
+#include "json_parameters.h"
 #include "config.h"
 
 
@@ -11,6 +12,8 @@ void download_list()
 	data[0] = DOWNLOAD_ID;
 	length = sizeof(data);
 	send_to_server(data, length, 0);
+	csp_buffer_init(1,200);
+	init_udp();
 	csp_packet_t * recv_packet = returned_from_server();
 	check_packet(recv_packet, 0);
 
@@ -93,39 +96,38 @@ csp_packet_t * returned_from_server(csp_packet_t * packet, int amountOfIds){
 void check_packet(csp_packet_t * packet, int amountOfIds){
 
 	uint8_t identifier = packet->data[0];
-	uint8_t data[packet->length - 1];
-	for(int i = 1; i < packet->length; i++){
-		data[i-1] = packet->data[i];
-	}
-
+	printf("identifier: %d\n", identifier);
+	printf("packet->length: %d\n", packet->length);
 	switch(identifier){
 		case SET_ID:
 			set_updated(amountOfIds);
 			break;
 		case GET_ID:
-			printf("AAA\n");
-			add_values(data, sizeof(data));
+			add_values(packet->data, packet->length);
 			break;
 		case DOWNLOAD_ID:
-			store_list_from_bytes(data, packet->length -1);
+			store_list_from_bytes(packet->data, packet->length);
 			break;
 		case REFRESH_ID:
-			check_refresh(data[0]);
+			check_refresh(packet->data[1]);
 			break;
+		default:
+			printf("default case at line %d\n", __LINE__);
+			printf("Reply of server was not correct\n");
 	}
 }
 
 
-csp_iface_t * init_udp(int bytes)
+csp_iface_t * init_udp()
 {
-	if(csp_buffer_init(1, bytes)<0)
-	printf("could not initialize buffer\n");
+
+	csp_buffer_init(10,sizeof(parameter_list_union.par_list)+1);
 
 	csp_conf_t csp_conf;
 	csp_conf_get_defaults(&csp_conf);
 	csp_conf.address = MY_ADDRESS;
 	if(csp_init(&csp_conf) < 0)
-	printf("could not initialize csp\n");
+		printf("could not initialize csp\n");
 
 	static csp_iface_t udp_iface;
 	csp_if_udp_init(&udp_iface, DEST_IP );
@@ -133,4 +135,5 @@ csp_iface_t * init_udp(int bytes)
 
 
   return &udp_iface;
+
 }

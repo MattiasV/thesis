@@ -5,39 +5,35 @@ int main(int argc, char* argv[])
 	refresh = 1;
 
 	// SETTING UP UDP CSP SERVER AND LISTEN FOR INCOMMING MSG
-
-	if(csp_buffer_init(1, MAX_SET_BYTES_REQUEST)<0)			// initialize 10 packets with 80 bytes each
-  return -1;
+	csp_buffer_init(10, MAX_SET_BYTES_REQUEST);
 
   csp_conf_t csp_conf;
 	csp_conf_get_defaults(&csp_conf);
 	csp_conf.address = MY_ADDRESS;
   if(csp_init(&csp_conf) < 0)			// initialize csp for the further use of ports and qfifo
-  return -1;
+  	return -1;
 
 	static csp_iface_t iface;
 	csp_if_udp_init(&iface, IP );
   csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
 
 	//FOR TESTING
-	csp_buffer_init(1,1);
-	csp_packet_t * packet;
-	packet = csp_buffer_get(1);
-	packet->data[0] = 1;
-	packet->length = 1;
-	listen_in(packet->data, packet->length);
-//
-// while(1){
-//
-// 		csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
-//     csp_qfifo_t input;
-//     if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
-// 			continue;
-// 		}
-//     csp_packet_t * packet;
-// 		packet = input.packet;
-// 		listen_in(packet->data, packet->length);
-// 	}
+	// uint8_t data[] = {1};
+	// int length = 1;
+	// listen_in(&iface, data, length);
+
+	while(1){
+
+		csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
+    csp_qfifo_t input;
+    if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
+			continue;
+		}
+    csp_packet_t * packet;
+		packet = input.packet;
+		listen_in(packet->data, packet->length);
+	}
+	return 0;
 
 }
 
@@ -59,7 +55,7 @@ int get_parameter_list_size()
 }
 
 // Function designed for chat between client and server.
-void listen_in(uint8_t * data, int length)
+void listen_in(csp_iface_t * iface, uint8_t * data, int length)
 {
 	// We krijgen altijd maar max een buffer van 4-6 bytes binnen
 
@@ -74,15 +70,15 @@ void listen_in(uint8_t * data, int length)
 			break;
 		case DOWNLOAD_ID:
 			printf("ID received for downloading the parameterlist \n");
-			send_parameter_list();
+			send_parameter_list(iface);
 			break;
 		case SET_ID:
 			printf("We gaan een parameter instellen \n");
-			set_parameter(data, length);
+			set_parameter(iface, data, length);
 			break;
 		case GET_ID:
 			printf("We gaan een parameter opvragen with length: %d\n", length);
-			get_parameter(data, length);
+			get_parameter(iface, data, length);
 			break;
 		case SIZE_ID:
 			printf("We gaan de grootte van de parameterlijst opvragen \n");
@@ -106,22 +102,31 @@ void send_refresh()
 }
 
 // Send parameter list to client
-void send_parameter_list()
+void send_parameter_list(csp_iface_t * iface)
 {
-
+	//filling the union par_list
 	for(int i = 0; i < DIFFERENT_PARAMETERS; i++){
 		parameter_list_union.par_list[i] = parameterlist[i];
 	}
-	csp_buffer_init(1,sizeof(parameterlist));
-	csp_packet_t * packet = csp_buffer_get(sizeof(parameterlist));
+
+	csp_buffer_init(1,sizeof(parameterlist)+1);
+	csp_packet_t * packet = csp_buffer_get(sizeof(parameterlist)+1);
+
+	//setting the message id
+	packet->data[0] = DOWNLOAD_ID;
+
+	// filling the packet with the byte array from the union
 	for(int i = 0; i < sizeof(parameterlist); i++){
-		packet->data[i] = parameter_list_union.par_list_bytes[i];
+		packet->data[i+1] = parameter_list_union.par_list_bytes[i];
+		printf("data[%d]: %d\n", i+1, packet->data[i+1]);
 	}
-	csp_if_udp_tx(&iface, packet, TIMEOUT);
+	packet->length = sizeof(parameterlist) + 1;
+
+	csp_if_udp_tx(iface, packet, TIMEOUT);
 }
 
 
-void set_parameter(uint8_t * data, int length)
+void set_parameter(csp_iface_t * iface, uint8_t * data, int length)
 {
 	uint8_t par_id;
 	int amount_of_paramters = sizeof(parameterlist)/sizeof(parameter_t);
@@ -145,7 +150,7 @@ void set_parameter(uint8_t * data, int length)
 	packet->data[0] = data[0]; // packet->data[0] = SET_ID
 	packet->length = 1;
 	printf("packet->data: %d\n", packet->data[0]);
-	csp_if_udp_tx(&iface, packet, TIMEOUT);
+	csp_if_udp_tx(iface, packet, TIMEOUT);
 
 }
 
@@ -191,7 +196,7 @@ int check_type_and_set_register(int index, uint8_t * data, int type, int offset)
 }
 
 // Functie om de parameter te gaan lezen van de zynq
-void get_parameter(uint8_t * data, int length)
+void get_parameter(csp_iface_t * iface, uint8_t * data, int length)
 {
 	uint8_t recv8;
 	uint8_t sendbuf8[1];
@@ -199,7 +204,6 @@ void get_parameter(uint8_t * data, int length)
 	uint32_t sendbuf32[1];
 	float recvfl;
 	float sendbuffl[1];
-	printf("test\n");
 
 	csp_buffer_init(1,(1+4)*length); //1 for each ID and 4 for the max amount of bytes in a value
 	csp_packet_t * packet;
@@ -226,7 +230,7 @@ void get_parameter(uint8_t * data, int length)
 		printf("packet->data[%d]: %d\n", i, packet->data[i]);
 	}
 	printf("sending..\n");
-	csp_if_udp_tx(&iface, packet, TIMEOUT);
+	csp_if_udp_tx(iface, packet, TIMEOUT);
 }
 
 int check_type_and_get_register(int datatype, int offset){

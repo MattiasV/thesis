@@ -9,13 +9,15 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "json_parameters.h"
+
 #define JSON_FLAG JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY
 
 //global variables
 struct json_object * parsed_json;
 
 void store_list_from_bytes(uint8_t * data, int length);
-int get_byte_data_in_json(json_object * jparameter, uint8_t * data, int index_of_data);
+void get_par_list_in_json(json_object * jobjarray, parameter_t * parameterlist, int index_of_data);
 void add_values(uint8_t * data, int length);
 int set_value_in_jobject(json_object * jparameter, uint8_t * data, int index_of_data);
 void set_updated(int amountOfIds);

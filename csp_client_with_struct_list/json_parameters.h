@@ -9,7 +9,7 @@ enum datatypes {none,u8,i8,u16,i16,u32,i32,f32,c,s,b};
 
 typedef struct {
   uint8_t id;
-  const char * description;
+  char description[15];
   enum datatypes datatype;
 	uint32_t offset; //defined in GSenseHal.h
 	int32_t value;
@@ -20,7 +20,7 @@ typedef struct {
 
 union{
   uint8_t par_list_bytes[DIFFERENT_PARAMETERS*sizeof(parameter_t)];
-  Memory par_list[DIFFERENT_PARAMETERS];
+  parameter_t par_list[DIFFERENT_PARAMETERS];
 }parameter_list_union;
 
 
