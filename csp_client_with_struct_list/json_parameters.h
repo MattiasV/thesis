@@ -11,9 +11,9 @@ typedef struct {
   uint8_t id;
   char description[15];
   enum datatypes datatype;
-	uint32_t offset; //defined in GSenseHal.h
-	int32_t value;
-	bool updated;
+  uint32_t offset; //defined in GSenseHal.h
+  int32_t value;
+  bool updated;
 } parameter_t;
 
 #define DIFFERENT_PARAMETERS 5
