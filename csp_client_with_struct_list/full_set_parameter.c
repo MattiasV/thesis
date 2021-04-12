@@ -23,7 +23,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	argv = &argv[1];
 	int size = argc-1;
 	int length = 0;
 
@@ -32,7 +31,7 @@ int main(int argc, char* argv[])
 
 	bytesToSend[0] = SET_ID;
 	int byteindex = 1; //start at index 1 because SET_ID is on 0
-	for(int i = 0; i < size; i += 2){
+	for(int i = 1; i < size; i += 2){
 
 		uint8_t id = atoi(argv[i]);
 		int type = get_type(id);
@@ -45,45 +44,64 @@ int main(int argc, char* argv[])
 		if(type <= 2)
 		{
 			int value = atoi(argv[i+1]);
-			//printf("parameterCheck: %d\n", parameterCheck);
 
-			idArray[i/2] = id;
-			bytesToSend[byteindex++] = id;
-			length++;
-			bytesToSend[byteindex++] = value;
-			length++;
+			//ERROR_CHECK
+			if(value > 255 || value < 0 && type == 1)
+				printf("Value at position %d is not of type uint8_t!\n", i+1);
+			else if(value < -128 || value > 128 && type == 2)
+				printf("Value at position %d is not of type int8_t!\n", i+1);
+
+			else{
+				idArray[i/2] = id;
+				bytesToSend[byteindex++] = id;
+				bytesToSend[byteindex++] = value;
+			}
 
 		}
 
-		else if(type > 2 && type <= 4)
+		else if(type <= 4)
 		{
 			int value = atoi(argv[i]);
-			idArray[i/2] = id;
-			bytesToSend[byteindex++] = id;
-			length++;
-			if(value >= 0)
-				fourBytesUnion.u16bytes[0] = value;
-			else
-				fourBytesUnion.i16bytes[0] = value;
-			for(int j = 0; j < 2; j++){
-				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
-				length++;
+
+			//ERROR_CHECK
+			if(value > 65535 || value < 0 && type == 3)
+				printf("Value at position %d is not of type uint16_t!\n", i+1);
+			else if(value < -32768 || value > 32767 && type == 4)
+				printf("Value at position %d is not of type int16_t!\n", i+1);
+
+			else{
+				idArray[i/2] = id;
+				bytesToSend[byteindex++] = id;
+				if(value >= 0)
+					fourBytesUnion.u16bytes[0] = value;
+				else
+					fourBytesUnion.i16bytes[0] = value;
+				for(int j = 0; j < 2; j++){
+					bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
+				}
 			}
 		}
 
-		else if(type > 4 && type <= 6)
+		else if(type <= 6)
 		{
 			int value = atoi(argv[i]);
-			idArray[i/2] = id;
-			bytesToSend[byteindex++] = id;
-			length++;
-			if(value >= 0)
-				fourBytesUnion.u32bytes = value;
-			else
-				fourBytesUnion.i32bytes = value;
-			for(int j = 0; j < 4; j++){
-				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
-				length++;
+
+			//ERROR_CHECK
+			if(value > 4294967295 || value < 0 && type == 5) //onnodige check omdat value een int is...
+				printf("Value at position %d is not of type uint32_t!\n", i+1);
+			else if(value < -2147483648 || value > 2147483647 && type == 6)
+				printf("Value at position %d is not of type int32_t!\n", i+1);
+
+			else{
+				idArray[i/2] = id;
+				bytesToSend[byteindex++] = id;
+				if(value >= 0)
+					fourBytesUnion.u32bytes = value;
+				else
+					fourBytesUnion.i32bytes = value;
+				for(int j = 0; j < 4; j++){
+					bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
+				}
 			}
 		}
 
@@ -92,16 +110,14 @@ int main(int argc, char* argv[])
 			float value = atoi(argv[i]);
 			idArray[i/2] = id;
 			bytesToSend[byteindex++] = id;
-			length++;
 			fourBytesUnion.fbytes = value;
 			for(int j = 0; j < 4; j++){
 				bytesToSend[byteindex++] = fourBytesUnion.u8bytes[j];
-				length++;
 			}
 		}
 	}
 
-	send_to_server(bytesToSend, length, size/2);
+	send_to_server(bytesToSend, byteindex, size/2);
 	free(bytesToSend);
 	return 0;
 }
