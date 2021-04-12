@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 		}
     csp_packet_t * packet;
 		packet = input.packet;
-		listen_in(packet->data, packet->length);
+		listen_in(&iface, packet->data, packet->length);
 	}
 	return 0;
 
@@ -138,7 +138,7 @@ void set_parameter(csp_iface_t * iface, uint8_t * data, int length)
 		for(int j = 0; j < amount_of_paramters; j++){
 			if(parameterlist[j].id == par_id){
 				int index = i;
-				index = check_type_and_set_register(i, data, parameterlist[j].datatype, parameterlist[j].offset);
+				index = check_type_and_set_register(i,j, data, parameterlist[j].datatype, parameterlist[j].offset);
 				i = index;
 			}
 		}
@@ -154,42 +154,49 @@ void set_parameter(csp_iface_t * iface, uint8_t * data, int length)
 
 }
 
-int check_type_and_set_register(int index, uint8_t * data, int type, int offset){
+int check_type_and_set_register(int index, int parameterlist_index, uint8_t * data, int type, int offset){
 
 	switch(type){
 		case u8:
-			setRegister_u8(offset, data[index++]);
+			if(setRegister_u8(offset, data[index])==1)
+				parameterlist[parameterlist_index].value = data[index++];
 			break;
 		case i8:
-			setRegister_i8(offset, data[index++]);
+			if(setRegister_i8(offset, data[index])==1)
+				parameterlist[parameterlist_index].value = data[index++];
 			break;
 		case u16:
 			fourBytesUnion.u8bytes[0] = data[index++];
 			fourBytesUnion.u8bytes[1] = data[index++];
-			setRegister_u16(offset, fourBytesUnion.u16bytes[0]);
+			if(setRegister_u16(offset, fourBytesUnion.u16bytes[0])==1)
+				parameterlist[parameterlist_index].value = fourBytesUnion.u16bytes[0];
 			break;
 		case i16:
 			fourBytesUnion.u8bytes[0] = data[index++];
 			fourBytesUnion.i8bytes[1] = data[index++];
-			setRegister_i16(offset, fourBytesUnion.i16bytes[0]);
+			if(setRegister_i16(offset, fourBytesUnion.i16bytes[0])==1)
+				parameterlist[parameterlist_index].value = fourBytesUnion.i16bytes[0];
 			break;
 		case u32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[index++];
 			}
-			setRegister_u32(offset, fourBytesUnion.u32bytes);
+			if(setRegister_u32(offset, fourBytesUnion.u32bytes)==1)
+				parameterlist[parameterlist_index].value = fourBytesUnion.u32bytes;
 			break;
 		case i32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.i8bytes[i] = data[index++];
 			}
-			setRegister_i32(offset, fourBytesUnion.i32bytes);
+			if(setRegister_i32(offset, fourBytesUnion.i32bytes)==1)
+				parameterlist[parameterlist_index].value = fourBytesUnion.i32bytes;
 			break;
 		case f32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[index++];
 			}
-			setRegister_float(offset, fourBytesUnion.fbytes);
+			if(setRegister_float(offset, fourBytesUnion.fbytes)==1)
+				parameterlist[parameterlist_index].value = fourBytesUnion.fbytes;
 			break;
 	}
 	return index;
@@ -226,10 +233,6 @@ void get_parameter(csp_iface_t * iface, uint8_t * data, int length)
 		}
 	}
 	packet->length = index;
-	for(int i = 0; i < index; i++){
-		printf("packet->data[%d]: %d\n", i, packet->data[i]);
-	}
-	printf("sending..\n");
 	csp_if_udp_tx(iface, packet, TIMEOUT);
 }
 

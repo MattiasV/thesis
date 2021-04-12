@@ -64,6 +64,6 @@ void send_parameter_list(csp_iface_t * iface);
 int check_datatype_and_put_in_byte_array(uint8_t * list_in_bytes, int datatype, int list_in_bytes_index, int parameterlist_index);
 void set_parameter(csp_iface_t * iface, uint8_t * msg, int length);
 void get_parameter(csp_iface_t * iface, uint8_t * data, int length);
-int check_type_and_set_register(int index, uint8_t * data, int type, int offset);
+int check_type_and_set_register(int index, int parameterlist_index, uint8_t * data, int type, int offset);
 int check_type_and_get_register(int datatype, int offset);
 #endif // _PARAMETERSERVICE_H_

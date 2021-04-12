@@ -30,22 +30,22 @@ int main(int argc, char* argv[])
 	bzero(bytesToSend, MAX_GET_BYTES);
 
 	bytesToSend[0] = GET_ID;
-
+	int id_count = 1;
 	for(int i = 0; i < size; i ++){
 
 		uint8_t parameterId = atoi(argv[i]);
 		int type = get_type(parameterId);
 		if(type == 0)
 		{
-			printf("PARAMETER is unknown with current id: %d, try again sending this id again \n", parameterId);
+			printf("PARAMETER is unknown with current ID: %d, please check if this ID is in the parameter list \n", parameterId);
 		}
 
 		else{
 		}
-		bytesToSend[i+1] = parameterId;
+		bytesToSend[id_count++] = parameterId;
 	}
-	
-	get_parameter_command(bytesToSend, argc, size);
+
+	get_parameter_command(bytesToSend, id_count, size);
 
 	free(idArray);
 	free(bytesToSend);
