@@ -54,7 +54,9 @@ int get_parameter_list_size()
 	return list_size;
 }
 
-// Function designed for chat between client and server.
+/*
+Kijken naar de MSG_ID en op basis van deze de bijhorende functie aanroepen
+*/
 void listen_in(csp_iface_t * iface, uint8_t * data, int length)
 {
 	// We krijgen altijd maar max een buffer van 4-6 bytes binnen
@@ -101,7 +103,9 @@ void send_refresh()
 	csp_if_udp_tx(&iface, packet, TIMEOUT);
 }
 
-// Send parameter list to client
+/*
+Deze functie gaat de parameter list omzetten naar een byte array en verstuurt deze naar de client met de MSG_ID ervoor
+*/
 void send_parameter_list(csp_iface_t * iface)
 {
 	//filling the union par_list
@@ -125,7 +129,10 @@ void send_parameter_list(csp_iface_t * iface)
 	csp_if_udp_tx(iface, packet, TIMEOUT);
 }
 
-
+/*
+Deze functie gaat de ID zoeken en wanneer hij een match vindt dan roept hij check_type_and_set_register op om de waarde wel echt weg te schrijven
+Als alle data afgegaan is dan verstuurt hij een ACK terug naar de client
+*/
 void set_parameter(csp_iface_t * iface, uint8_t * data, int length)
 {
 	uint8_t par_id;
@@ -154,29 +161,38 @@ void set_parameter(csp_iface_t * iface, uint8_t * data, int length)
 
 }
 
+/*
+Deze functie zet de value die gedefinieerd zijn in set_parameter in de registers van de starterkit
+Bij no error gaat hij deze ook updaten in de parameterlist zelf
+*/
 int check_type_and_set_register(int index, int parameterlist_index, uint8_t * data, int type, int offset){
 
 	switch(type){
+
 		case u8:
 			if(setRegister_u8(offset, data[index])==1)
 				parameterlist[parameterlist_index].value = data[index++];
 			break;
+
 		case i8:
 			if(setRegister_i8(offset, data[index])==1)
 				parameterlist[parameterlist_index].value = data[index++];
 			break;
+
 		case u16:
 			fourBytesUnion.u8bytes[0] = data[index++];
 			fourBytesUnion.u8bytes[1] = data[index++];
 			if(setRegister_u16(offset, fourBytesUnion.u16bytes[0])==1)
 				parameterlist[parameterlist_index].value = fourBytesUnion.u16bytes[0];
 			break;
+
 		case i16:
 			fourBytesUnion.u8bytes[0] = data[index++];
 			fourBytesUnion.i8bytes[1] = data[index++];
 			if(setRegister_i16(offset, fourBytesUnion.i16bytes[0])==1)
 				parameterlist[parameterlist_index].value = fourBytesUnion.i16bytes[0];
 			break;
+
 		case u32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[index++];
@@ -184,6 +200,7 @@ int check_type_and_set_register(int index, int parameterlist_index, uint8_t * da
 			if(setRegister_u32(offset, fourBytesUnion.u32bytes)==1)
 				parameterlist[parameterlist_index].value = fourBytesUnion.u32bytes;
 			break;
+
 		case i32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.i8bytes[i] = data[index++];
@@ -191,6 +208,7 @@ int check_type_and_set_register(int index, int parameterlist_index, uint8_t * da
 			if(setRegister_i32(offset, fourBytesUnion.i32bytes)==1)
 				parameterlist[parameterlist_index].value = fourBytesUnion.i32bytes;
 			break;
+
 		case f32:
 			for(int i = 0; i < 4; i++){
 				fourBytesUnion.u8bytes[i] = data[index++];
@@ -202,7 +220,12 @@ int check_type_and_set_register(int index, int parameterlist_index, uint8_t * da
 	return index;
 }
 
-// Functie om de parameter te gaan lezen van de zynq
+/*
+Zoeken naar de ID en wanneer een match gevonden wordt de functie check_type_and_get_register aanroepen.
+Deze functie returned de grootte van de data, uint8_t = 1, uint16_t = 2, uint32_t = 4, ...
+Op basis van deze grootte gaat de packet->data gevuld worden.
+Wanneer alle ID's zijn afgegaan verstuurt hij de byte array naar de client.
+*/
 void get_parameter(csp_iface_t * iface, uint8_t * data, int length)
 {
 	uint8_t recv8;
@@ -236,6 +259,10 @@ void get_parameter(csp_iface_t * iface, uint8_t * data, int length)
 	csp_if_udp_tx(iface, packet, TIMEOUT);
 }
 
+/*
+Deze functie gaat de datatypes af en roept met een switch case de juiste functie aan om de juiste datatype te krijgen.
+Hij vult de juiste waarde van de union om het wegschrijven in de packet->data te vergemakkelijken
+*/
 int check_type_and_get_register(int datatype, int offset){
 	switch(datatype){
 		case u8:
