@@ -16,9 +16,9 @@ int main(int argc, char* argv[])
 	}
 	bytesToSend = malloc(MAX_PRINT_BYTES);
 	bzero(bytesToSend, MAX_PRINT_BYTES);
-
-	download_list();
-
+	bytesToSend[0] = DOWNLOAD_ID;
+	start_communication(bytesToSend, 1, 0);
+	printf("\n\n");
 	print_list();
 
 	free(bytesToSend);

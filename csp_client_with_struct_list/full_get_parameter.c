@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 		printf("you provided too musch parameters!\n");
 		printf("MAX amount of parameters is %d, you provided %d parameters\n", MAX_GET_BYTES, size);
 	}
-
+	printf("\n\n");
 	bytesToSend = malloc(MAX_GET_BYTES);
 	bzero(bytesToSend, MAX_GET_BYTES);
 
@@ -37,15 +37,15 @@ int main(int argc, char* argv[])
 		int type = get_type(parameterId);
 		if(type == 0)
 		{
-			printf("PARAMETER is unknown with current ID: %d, please check if this ID is in the parameter list \n", parameterId);
+			printf("  PARAMETER is unknown with current ID: %d, please check if this ID is in the parameter list \n", parameterId);
 		}
 
 		else{
+			bytesToSend[id_count++] = parameterId;
 		}
-		bytesToSend[id_count++] = parameterId;
 	}
 
-	get_parameter_command(bytesToSend, id_count, size);
+	start_communication(bytesToSend, id_count, size);
 
 	free(idArray);
 	free(bytesToSend);

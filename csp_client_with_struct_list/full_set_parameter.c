@@ -7,6 +7,7 @@
 
 int main(int argc, char* argv[])
 {
+	printf("\n\n");
 	// in cmd: ./set_parameter 1 0
 	// argv[1] = 1 --> gaat parameter ID worden
 	// argv[2] = 0 --> gaat parameter waarde worden
@@ -18,8 +19,8 @@ int main(int argc, char* argv[])
 
 	if(argc%2 == 0)
 	{
-		printf("Wrong input! You didnt provide the input in following format: \n");
-		printf("./set_parameter <id> <value> <id> <value> ...\n");
+		printf("  Wrong input! You didnt provide the input in following format: \n");
+		printf("  ./set_parameter <id> <value> <id> <value> ...\n");
 		return 1;
 	}
 
@@ -38,18 +39,18 @@ int main(int argc, char* argv[])
 
 		if(type == 0)
 		{
-			printf("PARAMETER is unknown, try again \n");
+			printf("  PARAMETER is unknown, try again \n");
 		}
 
 		if(type <= 2)
 		{
-			int value = atoi(argv[i+1]);
+			double value = atoi(argv[i+1]);
 
 			//ERROR_CHECK
 			if(value > 255 || value < 0 && type == 1)
-				printf("Value at position %d is not of type uint8_t!\n", i+1);
+				printf("  Value at position %d is not in the range of type uint8_t!\n", i+1);
 			else if(value < -128 || value > 128 && type == 2)
-				printf("Value at position %d is not of type int8_t!\n", i+1);
+				printf("  Value at position %d is not in the range of type int8_t!\n", i+1);
 
 			else{
 				idArray[i/2] = id;
@@ -61,13 +62,12 @@ int main(int argc, char* argv[])
 
 		else if(type <= 4)
 		{
-			int value = atoi(argv[i]);
-
+			int value = atoi(argv[i+1]);
 			//ERROR_CHECK
 			if(value > 65535 || value < 0 && type == 3)
-				printf("Value at position %d is not of type uint16_t!\n", i+1);
+				printf("  Value at position %d is not in the range of type uint16_t!\n", i+1);
 			else if(value < -32768 || value > 32767 && type == 4)
-				printf("Value at position %d is not of type int16_t!\n", i+1);
+				printf("  Value at position %d is not in the range of type int16_t!\n", i+1);
 
 			else{
 				idArray[i/2] = id;
@@ -84,13 +84,13 @@ int main(int argc, char* argv[])
 
 		else if(type <= 6)
 		{
-			int value = atoi(argv[i]);
+			double value = atof(argv[i+1]);
 
 			//ERROR_CHECK
 			if(value > 4294967295 || value < 0 && type == 5) //onnodige check omdat value een int is...
-				printf("Value at position %d is not of type uint32_t!\n", i+1);
+				printf("  Value at position %d is not in the range of type uint32_t!\n", i+1);
 			else if(value < -2147483648 || value > 2147483647 && type == 6)
-				printf("Value at position %d is not of type int32_t!\n", i+1);
+				printf("  Value at position %d is not in the range of type int32_t!\n", i+1);
 
 			else{
 				idArray[i/2] = id;
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
 		if(type == 7)
 		{
-			float value = atoi(argv[i]);
+			float value = atof(argv[i+1]);
 			idArray[i/2] = id;
 			bytesToSend[byteindex++] = id;
 			fourBytesUnion.fbytes = value;
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	send_to_server(bytesToSend, byteindex, size/2);
+	start_communication(bytesToSend, byteindex, size/2);
 	free(bytesToSend);
 	return 0;
 }

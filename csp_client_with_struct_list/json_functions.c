@@ -20,10 +20,10 @@ void store_list_from_bytes(uint8_t * data, int length)
 
 	for(int i = 1; i < length; i++){
 		parameter_list_union.par_list_bytes[i-1] = data[i];
-		printf("data[%d]: %d\n", i, data[i]);
+		//printf("data[%d]: %d\n", i, data[i]);
 	}
 
-	printf("parameterlist[0].description: %s\n", parameter_list_union.par_list[0].description);
+//	printf("parameterlist[0].description: %s\n", parameter_list_union.par_list[0].description);
 
 	get_par_list_in_json(jobjarray, parameter_list_union.par_list, length/sizeof(parameter_t));
 
@@ -184,7 +184,7 @@ void print_list()
 	jobj = json_object_new_object();
 	struct json_object * jobj_array = get_json_from_file(); //getting the amount of different id's
 	json_object_object_add(jobj, "parameters", jobj_array);
-	printf("%s", json_object_to_json_string_ext(jobj, JSON_FLAG));
+	printf("%s\n\n\n", json_object_to_json_string_ext(jobj, JSON_FLAG));
 	json_object_put(jobj);
 }
 
