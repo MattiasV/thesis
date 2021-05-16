@@ -66,6 +66,10 @@ met de functie set_value_in_jobject het datatype kan laten kloppen.
 */
 void add_values(uint8_t * data, int length){
 
+	for(int i = 0; i < length; i++){
+		printf("%d\n", data[i]);
+	}
+
 	struct json_object * jobj;
 	jobj = json_object_new_object();
 	json_object * jobj_array = get_json_from_file();
@@ -76,6 +80,7 @@ void add_values(uint8_t * data, int length){
 		for(int j = 0; j < json_array_size; j++){
 			json_object * jparameter = json_object_array_get_idx(jobj_array, j);
 			int id = json_object_get_int(json_object_object_get(jparameter,"id"));
+			printf("data[i]: %d\n", data[i]);
 			if(data[i] == id) {
 				i++;
 				int index = i;
@@ -180,12 +185,25 @@ Deze functie print de json object als een string met de json_object_to_json_stri
 void print_list()
 {
 
-	struct json_object * jobj;
-	jobj = json_object_new_object();
+	//struct json_object * jobj;
+	//jobj = json_object_new_object();
 	struct json_object * jobj_array = get_json_from_file(); //getting the amount of different id's
-	json_object_object_add(jobj, "parameters", jobj_array);
-	printf("%s\n\n\n", json_object_to_json_string_ext(jobj, JSON_FLAG));
-	json_object_put(jobj);
+	int json_array_size = json_object_array_length(jobj_array);
+	//json_object_object_add(jobj, "parameters", jobj_array);
+	printf("--------------------------------- PARAMETER LIST ---------------------------------\n\n");
+	printf("ID\t|  Description\t|  Datatype\t|  Offset\t|  Value\t|  Updated\n");
+	for(int i = 0; i < json_array_size; i++){
+		json_object * jparameter = json_object_array_get_idx(jobj_array, i);
+		int id = json_object_get_int(json_object_object_get(jparameter,"id"));
+		const char * description = json_object_get_string(json_object_object_get(jparameter,"description"));
+		int datatype = json_object_get_int(json_object_object_get(jparameter,"datatype"));
+		int offset = json_object_get_int(json_object_object_get(jparameter,"offset"));
+		int value = json_object_get_int(json_object_object_get(jparameter,"value"));
+		int updated = json_object_get_int(json_object_object_get(jparameter,"updated"));
+		printf("%d\t|  %s\t|  %d\t\t|  %d\t\t|  %d\t\t|  %d\n", id, description, datatype, offset, value, updated);
+	}
+	//printf("%s\n\n\n", json_object_to_json_string_ext(jobj, JSON_FLAG));
+	//json_object_put(jobj);
 }
 
 /*

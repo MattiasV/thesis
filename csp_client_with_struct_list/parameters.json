@@ -2,7 +2,7 @@
    "parameters": [
      {
        "id": 0,
-       "description": "VersionNr",
+       "description": "ExposureTime",
        "datatype": 1,
        "offset": 0,
        "value": 20,
@@ -10,7 +10,7 @@
      },
      {
        "id": 1,
-       "description": "FirmwareD",
+       "description": "Frame rate",
        "datatype": 1,
        "offset": 0,
        "value": 0,
@@ -18,7 +18,7 @@
      },
      {
        "id": 2,
-       "description": "LedCtrl",
+       "description": "Led control",
        "datatype": 1,
        "offset": 256,
        "value": 0,
@@ -26,7 +26,7 @@
      },
      {
        "id": 3,
-       "description": "CamCont",
+       "description": "u32_test",
        "datatype": 5,
        "offset": 512,
        "value": 0,
@@ -34,7 +34,7 @@
      },
      {
        "id": 4,
-       "description": "Test",
+       "description": "i32_test",
        "datatype": 6,
        "offset": 400,
        "value": 0,
