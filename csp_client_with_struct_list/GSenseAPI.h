@@ -57,10 +57,9 @@ uint8_t * bytesToSend;
 uint8_t * idArray;
 
 // get_parameter functies
-void download_list();
 int load_list();
 void check_refresh(uint8_t refresh);
-void get_parameter_command(uint8_t * data, int length, int amountOfIds);
+void start_communication(uint8_t * data, int length, int amountOfIds);
 
 
 // Handige functies die we overal gebruiken
