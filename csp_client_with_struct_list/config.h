@@ -6,7 +6,7 @@
 
 //UDP things
 #define MY_ADDRESS 11
-#define DEST_IP "0.0.0.0"
+#define DEST_IP "192.168.1.42"
 #define DEST_ADDR 6
 #define DEST_PORT 10
 #define TIMEOUT 1000

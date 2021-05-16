@@ -40,18 +40,6 @@ void start_communication(uint8_t * data, int length, int amountOfIds){
 
 void send_to_server(uint8_t * data, int length, int amountOfIds){
 
-	printf("\n");
-	printf("  commando: set_parameter 0 1 1 20 2 256 3 400 4 42949672960\n\n");
-	printf("  Client sending: [");
-	for(int i = 0; i < length; i ++){
-		printf("%d",data[i]);
-		if(i+1 < length)
-			printf(",");
-	}
-	printf("]\n");
-	printf("  Format: [MSG_ID]");
-	printf("\n\n");
-
 	csp_iface_t * iface;
 	csp_packet_t * packet;
 
@@ -66,7 +54,7 @@ void send_to_server(uint8_t * data, int length, int amountOfIds){
 	/* for testing, making sure that the rx thread is at the reading line */
 	csp_sleep_ms(10);
 
-	//csp_if_udp_tx(iface, packet, 1000);
+	csp_if_udp_tx(iface, packet, 1000);
 
 }
 
