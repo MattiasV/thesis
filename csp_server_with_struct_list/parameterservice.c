@@ -17,32 +17,19 @@ int main(int argc, char* argv[])
 	csp_if_udp_init(&iface, IP );
   csp_rtable_set(0,0, &iface, CSP_NODE_MAC);
 
-	//FOR TESTING
-	// uint8_t data[] = {1};
-	// int length = 1;
-	// listen_in(&iface, data, length);
 
-	//while(1){
+	while(1){
 
-		// csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
-    // csp_qfifo_t input;
-    // if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
-		// 	continue;
-		// }
-    // csp_packet_t * packet;
-		// packet = input.packet;
-		uint8_t * buffer = malloc(1);
-		buffer[0] = 1;
-		// printf("\n\n\n  Input: [");
-		// for(int i = 0; i < packet->length; i++){
-		// 	printf("%d", packet->data[i]);
-		// 	if(i+1<packet->length)
-		// 		printf(",");
-		// }
-		// printf("]\n\n");
-		listen_in(&iface, buffer, sizeof(buffer));
-		free(buffer);
-	//}
+		csp_buffer_init(1,MAX_SET_BYTES_REQUEST);
+    csp_qfifo_t input;
+    if (csp_qfifo_read(&input) != CSP_ERR_NONE) {			// Waiting for incoming data
+			continue;
+		}
+    csp_packet_t * packet;
+		packet = input.packet;
+		printf("packet->data[0] = %d\n", packet->data[0]);
+		listen_in(&iface, packet->data, packet->length);
+	}
 	return 0;
 }
 
@@ -129,18 +116,9 @@ void send_parameter_list(csp_iface_t * iface)
 	packet->data[0] = DOWNLOAD_ID;
 
 	// filling the packet with the byte array from the union
-	printf("  Server sending: \n  [");
 	for(int i = 0; i < sizeof(parameterlist); i++){
 		packet->data[i+1] = parameter_list_union.par_list_bytes[i];
-		if((i-1)%sizeof(parameter_t)==0)
-			printf("\n  ");
-		printf("%d",packet->data[i]);
-		if(i+1<sizeof(parameterlist))
-			printf(",");
 	}
-	printf("\n  ]\n\n");
-	printf("  Format: \n  [MSG_ID,\n  parameter_1,\n  parameter_2,\n  parameter_3,\n  parameter_4,\n  parameter_5\n");
-	printf("  ]\n\n");
 	packet->length = sizeof(parameterlist) + 1;
 
 	csp_if_udp_tx(iface, packet, TIMEOUT);
@@ -274,25 +252,6 @@ void get_parameter(csp_iface_t * iface, uint8_t * data, int length)
 			}
 		}
 	}
-
-
-	printf("  Server sending: [");
-	for(int i = 0; i < index; i++ ){
-		printf("%d", packet->data[i]);
-		if(i + 1 < index)
-			printf(",");
-	}
-	printf("]\n");
-	printf("  Format: [MSG_ID,ID,Value,ID,Value,ID,Value,Value,Value,Value]\n\n");
-	printf("  ------ID value size table------\n");
-	printf("  \t|  ID  Size | \n");
-	printf("  \t|  0\t1   |\n");
-	printf("  \t|  1\t1   |\n");
-	printf("  \t|  2\t1   |\n");
-	printf("  \t|  3\t4   |\n");
-	printf("  \t|  4\t4   |\n");
-	printf("\n\n");
-
 
 	packet->length = index;
 	csp_if_udp_tx(iface, packet, TIMEOUT);
